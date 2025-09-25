@@ -2,6 +2,7 @@ package com.xinian.tickaccelerate.mixin;
 
 import com.xinian.tickaccelerate.TickAccelerate;
 import com.xinian.tickaccelerate.util.TPSUtil;
+import com.xinian.tickaccelerate.util.TPSCalculator;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.objectweb.asm.Opcodes;
@@ -20,7 +21,7 @@ public abstract class PlayerMixin {
         if (!TickAccelerate.config.enabled() || !TickAccelerate.config.portalAcceleration()) return;
         if (((Entity) (Object) this).getLevel().isClientSide()) return;
         if (original == 1) return;
-        cir.setReturnValue(TPSUtil.tt20(original, false));
+        cir.setReturnValue(TPSUtil.tt20(original, false, TPSCalculator.tpsMultiplier)); // Added tpsMultiplier
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/player/Player;sleepCounter:I", opcode = Opcodes.GETFIELD))
@@ -28,7 +29,6 @@ public abstract class PlayerMixin {
         int original = player.getSleepTimer();
         if (!TickAccelerate.config.enabled() || !TickAccelerate.config.sleepingAcceleration()) return original;
         if (((Entity) (Object) this).getLevel().isClientSide()) return original;
-
         int ticksToApply = TickAccelerate.TPS_CALCULATOR.applicableMissedTicks();
         int cap = TickAccelerate.TPS_CALCULATOR.getEffectiveTickCap();
         if (cap > 0) {

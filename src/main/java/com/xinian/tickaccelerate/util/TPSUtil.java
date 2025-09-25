@@ -11,10 +11,14 @@ TPSUtil {
     private static final DecimalFormat df = new DecimalFormat("0.00", DecimalFormatSymbols.getInstance(Locale.ROOT));
     private static final DecimalFormat dfMissedTicks = new DecimalFormat("0.0000", DecimalFormatSymbols.getInstance(Locale.ROOT));
 
+    // New constants for TPS thresholds
+    public static final double TPS_GOOD_THRESHOLD = 15.0;
+    public static final double TPS_WARNING_THRESHOLD = 10.0;
+
     public static String colorizeTPS(double tps, boolean format) {
-        if (tps > 15) {
+        if (tps > TPS_GOOD_THRESHOLD) { // Use constant
             return "§a" + (format ? formatTPS(tps) : tps);
-        } else if (tps > 10) {
+        } else if (tps > TPS_WARNING_THRESHOLD) { // Use constant
             return "§e" + (format ? formatTPS(tps) : tps);
         } else {
             return "§c" + (format ? formatTPS(tps) : tps);
@@ -29,31 +33,31 @@ TPSUtil {
         return dfMissedTicks.format(missedTicks);
     }
 
-    public static float tt20(float ticks, boolean limitZero) {
-        float newTicks = (float) rawTT20(ticks);
+    public static float tt20(float ticks, boolean limitZero, double tpsMultiplier) {
+        float newTicks = (float) rawTT20(ticks, tpsMultiplier);
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static int tt20(int ticks, boolean limitZero) {
-        int newTicks = (int) Math.ceil(rawTT20(ticks));
+    public static int tt20(int ticks, boolean limitZero, double tpsMultiplier) {
+        int newTicks = (int) Math.ceil(rawTT20(ticks, tpsMultiplier));
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static double tt20(double ticks, boolean limitZero) {
-        double newTicks = (double) rawTT20(ticks);
+    public static double tt20(double ticks, boolean limitZero, double tpsMultiplier) {
+        double newTicks = (double) rawTT20(ticks, tpsMultiplier);
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static double rawTT20(double ticks) {
-        if (ticks == 0 || TPSCalculator.tpsMultiplier == 0) {
+    public static double rawTT20(double ticks, double tpsMultiplier) {
+        if (ticks == 0 || tpsMultiplier == 0) {
             return 0;
         }
-        return ticks / TPSCalculator.tpsMultiplier;
+        return ticks / tpsMultiplier;
     }
 }
