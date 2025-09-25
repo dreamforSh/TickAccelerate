@@ -25,7 +25,7 @@ public class TickAccelerate {
         LOGGER.info("Starting TickAccelerate...");
         CompletableFuture.runAsync(() -> {
             try {
-                // ModUpdater.check(); // TODO: update check
+                
             } catch (RuntimeException e) {
                 LOGGER.error("Failed to check for updates.");
                 e.printStackTrace();
