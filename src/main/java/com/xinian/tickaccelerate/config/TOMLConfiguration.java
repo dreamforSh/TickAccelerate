@@ -4,6 +4,8 @@ import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.xinian.tickaccelerate.TickAccelerate;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.List;
@@ -54,5 +56,19 @@ public class TOMLConfiguration {
 
     public CommentedConfig getRawConfig() {
         return config;
+    }
+
+    @Nullable
+    public Double getCustomTpsMultiplier(@Nullable ResourceLocation resourceLocation) {
+        if (resourceLocation == null) return null;
+        String path = "custom_acceleration." + resourceLocation.toString() + ".tpsMultiplier";
+        return config.get(path);
+    }
+
+    @Nullable
+    public Integer getCustomTickCap(@Nullable ResourceLocation resourceLocation) {
+        if (resourceLocation == null) return null;
+        String path = "custom_acceleration." + resourceLocation.toString() + ".tickCap";
+        return config.get(path);
     }
 }

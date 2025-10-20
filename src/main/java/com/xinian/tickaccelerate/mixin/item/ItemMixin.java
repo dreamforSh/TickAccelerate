@@ -2,9 +2,10 @@ package com.xinian.tickaccelerate.mixin.item;
 
 import com.xinian.tickaccelerate.TickAccelerate;
 import com.xinian.tickaccelerate.util.TPSUtil;
-import com.xinian.tickaccelerate.util.TPSCalculator; // Added import
+import com.xinian.tickaccelerate.util.TPSCalculator;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation; // Added import
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,6 +18,6 @@ public abstract class ItemMixin {
     private void onGetMaxUseTime(ItemStack p_41454_, CallbackInfoReturnable<Integer> cir) {
         int original = cir.getReturnValue();
         if (!TickAccelerate.config.enabled() || !TickAccelerate.config.eatingAcceleration() || original == 0) return;
-        cir.setReturnValue(TPSUtil.tt20(original, true, TPSCalculator.tpsMultiplier)); // Added tpsMultiplier
+        cir.setReturnValue(TPSUtil.tt20(original, true, TPSCalculator.tpsMultiplier, p_41454_.getItem().builtInRegistryHolder().key().location()));
     }
 }

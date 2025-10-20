@@ -1,6 +1,8 @@
 package com.xinian.tickaccelerate.util;
 
 import com.xinian.tickaccelerate.TickAccelerate;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -33,28 +35,48 @@ TPSUtil {
         return dfMissedTicks.format(missedTicks);
     }
 
-    public static float tt20(float ticks, boolean limitZero, double tpsMultiplier) {
-        float newTicks = (float) rawTT20(ticks, tpsMultiplier);
+    public static float tt20(float ticks, boolean limitZero, double tpsMultiplier, @Nullable ResourceLocation resourceLocation) {
+        float newTicks = (float) rawTT20(ticks, tpsMultiplier, resourceLocation);
+
+        Integer customTickCap = TickAccelerate.config.getCustomTickCap(resourceLocation);
+        if (customTickCap != null && customTickCap > 0) {
+            newTicks = Math.min(newTicks, customTickCap);
+        }
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static int tt20(int ticks, boolean limitZero, double tpsMultiplier) {
-        int newTicks = (int) Math.ceil(rawTT20(ticks, tpsMultiplier));
+    public static int tt20(int ticks, boolean limitZero, double tpsMultiplier, @Nullable ResourceLocation resourceLocation) {
+        int newTicks = (int) Math.ceil(rawTT20(ticks, tpsMultiplier, resourceLocation));
+
+        Integer customTickCap = TickAccelerate.config.getCustomTickCap(resourceLocation);
+        if (customTickCap != null && customTickCap > 0) {
+            newTicks = Math.min(newTicks, customTickCap);
+        }
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static double tt20(double ticks, boolean limitZero, double tpsMultiplier) {
-        double newTicks = (double) rawTT20(ticks, tpsMultiplier);
+    public static double tt20(double ticks, boolean limitZero, double tpsMultiplier, @Nullable ResourceLocation resourceLocation) {
+        double newTicks = (double) rawTT20(ticks, tpsMultiplier, resourceLocation);
+
+        Integer customTickCap = TickAccelerate.config.getCustomTickCap(resourceLocation);
+        if (customTickCap != null && customTickCap > 0) {
+            newTicks = Math.min(newTicks, customTickCap);
+        }
 
         if (limitZero) return newTicks > 0 ? newTicks : 1;
         else return newTicks;
     }
 
-    public static double rawTT20(double ticks, double tpsMultiplier) {
+    public static double rawTT20(double ticks, double tpsMultiplier, @Nullable ResourceLocation resourceLocation) {
+        Double customMultiplier = TickAccelerate.config.getCustomTpsMultiplier(resourceLocation);
+        if (customMultiplier != null) {
+            tpsMultiplier = customMultiplier;
+        }
+
         if (ticks == 0 || tpsMultiplier == 0) {
             return 0;
         }

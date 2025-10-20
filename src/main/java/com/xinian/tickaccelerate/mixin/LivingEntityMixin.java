@@ -17,7 +17,7 @@ public abstract class LivingEntityMixin {
     @Inject(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;tickEffects()V"))
     private void fixPotionDelayTick(CallbackInfo ci) {
         if (!TickAccelerate.config.enabled() || !TickAccelerate.config.potionEffectAcceleration()) return;
-        if (((Entity) (Object) this).getLevel().isClientSide()) return;
+        if (((Entity) (Object) this).level().isClientSide()) return;
 
         int ticksToApply = TickAccelerate.TPS_CALCULATOR.applicableMissedTicks();
         int cap = TickAccelerate.TPS_CALCULATOR.getEffectiveTickCap();

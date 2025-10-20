@@ -18,7 +18,7 @@ public abstract class BlockBehaviourMixin {
     @Inject(method = "getDestroyProgress", at = @At("RETURN"), cancellable = true)
     private void onBlockBreakingCalc(BlockState state, Player player, BlockGetter getter, BlockPos pos, CallbackInfoReturnable<Float> cir) {
         if (!TickAccelerate.config.enabled() || !TickAccelerate.config.blockBreakingAcceleration()) return;
-        if (player.getLevel().isClientSide()) return;
+        if (player.level().isClientSide()) return;
 
         float original = cir.getReturnValue();
         cir.setReturnValue(original * TPSCalculator.tpsMultiplier);
