@@ -142,6 +142,16 @@ public final class TickAccelerateCommand {
             line2.append(tickChip("Air", cfg.enableAirSupply.get(), active,
                     String.format("×%.1f refill", mult), "Air recovery +4/tick boosted"));
             src.sendSuccess(() -> line2, false);
+
+            MutableComponent line3 = Component.literal("    ");
+            int swingDur = Math.max(1, Math.round(6 * factor)); // default swing ≈ 6t
+            line3.append(tickChip("Swing", cfg.enableSwingSpeed.get(), active,
+                    String.format("6t→%dt", swingDur), "Attack arm swing animation speed"));
+            line3.append(lit("  ", ChatFormatting.DARK_GRAY));
+            int iFrames = Math.max(0, Math.round(20 * factor)); // invulnerableTime default=20
+            line3.append(tickChip("I-Frames", cfg.enableInvulnerability.get(), active,
+                    String.format("20t→%dt", iFrames), "Damage i-frames for non-player entities"));
+            src.sendSuccess(() -> line3, false);
         }
 
         // ── World compensations ──
@@ -167,6 +177,16 @@ public final class TickAccelerateCommand {
             line2.append(tickChip("Portal CD", cfg.enablePortalCooldown.get(), active,
                     String.format("10t→%dt", portalCD), "Portal re-entry cooldown (player)"));
             src.sendSuccess(() -> line2, false);
+        }
+
+        // ── Client animation compensations ──
+        src.sendSuccess(() -> sectionHeader("Client"), false);
+        {
+            MutableComponent line = Component.literal("    ");
+            line.append(tickChip("Animations", cfg.enableClientAnimations.get(), active,
+                    String.format("×%.1f playback", mult),
+                    "Client-side hurt flash, death anim, swing anim,\ni-frames play at correct real-time speed"));
+            src.sendSuccess(() -> line, false);
         }
 
         src.sendSuccess(() -> footerLink("/ta config", "View Config"), false);
@@ -211,6 +231,10 @@ public final class TickAccelerateCommand {
                 new String[]{"Hurt Time", "Death Time", "Air Supply"},
                 new boolean[]{cfg.enableHurtTime.get(), cfg.enableDeathTime.get(), cfg.enableAirSupply.get()}
         ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"Swing Speed", "I-Frames"},
+                new boolean[]{cfg.enableSwingSpeed.get(), cfg.enableInvulnerability.get()}
+        ), false);
 
         // ── World ──
         src.sendSuccess(() -> sectionHeader("World"), false);
@@ -218,6 +242,10 @@ public final class TickAccelerateCommand {
                 new String[]{"Fluid Flow", "Random Tick", "Portal CD"},
                 new boolean[]{cfg.enableFluidSpeed.get(), cfg.enableRandomTick.get(), cfg.enablePortalCooldown.get()}
         ), false);
+
+        // ── Client ──
+        src.sendSuccess(() -> sectionHeader("Client"), false);
+        src.sendSuccess(() -> toggleRow("Animations", cfg.enableClientAnimations.get()), false);
 
         src.sendSuccess(() -> footerLink("/ta status", "View Status"), false);
         return 1;

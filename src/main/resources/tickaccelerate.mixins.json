@@ -19,6 +19,8 @@
     "world.LavaFluidMixin"
   ],
   "client": [
+    "client.ClientLevelMixin",
+    "client.ClientLivingEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

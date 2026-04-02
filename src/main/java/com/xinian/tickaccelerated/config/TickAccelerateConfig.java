@@ -32,11 +32,16 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableHurtTime;
     public final ModConfigSpec.BooleanValue enableDeathTime;
     public final ModConfigSpec.BooleanValue enableAirSupply;
+    public final ModConfigSpec.BooleanValue enableSwingSpeed;
+    public final ModConfigSpec.BooleanValue enableInvulnerability;
 
     /* ── world ── */
     public final ModConfigSpec.BooleanValue enableFluidSpeed;
     public final ModConfigSpec.BooleanValue enableRandomTick;
     public final ModConfigSpec.BooleanValue enablePortalCooldown;
+
+    /* ── client ── */
+    public final ModConfigSpec.BooleanValue enableClientAnimations;
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -97,6 +102,12 @@ public final class TickAccelerateConfig {
         var enableAirSupplyVal = builder
                 .comment("Compensate air supply recovery speed when surfacing from water.")
                 .define("enableAirSupply", true);
+        var enableSwingSpeedVal = builder
+                .comment("Compensate attack swing animation speed so arm swings play at correct real-time speed.")
+                .define("enableSwingSpeed", true);
+        var enableInvulnerabilityVal = builder
+                .comment("Compensate damage invulnerability frames (iFrames) for non-player entities.")
+                .define("enableInvulnerability", true);
         builder.pop();
 
         /* ── World ── */
@@ -112,6 +123,15 @@ public final class TickAccelerateConfig {
                 .define("enablePortalCooldown", true);
         builder.pop();
 
+        /* ── Client ── */
+        builder.comment("Client-side animation compensations").push("client");
+        var enableClientAnimationsVal = builder
+                .comment("Compensate client-side animation playback speed (hurt flash, death animation, swing animation, etc).",
+                         "When TPS is low, these tick-based animations normally play slower than intended.",
+                         "This makes them play at correct real-time speed on the client.")
+                .define("enableClientAnimations", true);
+        builder.pop();
+
         SPEC = builder.build();
 
         INSTANCE = new TickAccelerateConfig(
@@ -120,7 +140,9 @@ public final class TickAccelerateConfig {
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
                 enablePotionEffectVal, enableItemPickupDelayVal, enablePortalTimeVal,
                 enableHurtTimeVal, enableDeathTimeVal, enableAirSupplyVal,
-                enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal
+                enableSwingSpeedVal, enableInvulnerabilityVal,
+                enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal,
+                enableClientAnimationsVal
         );
     }
 
@@ -139,9 +161,12 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableHurtTime,
             ModConfigSpec.BooleanValue enableDeathTime,
             ModConfigSpec.BooleanValue enableAirSupply,
+            ModConfigSpec.BooleanValue enableSwingSpeed,
+            ModConfigSpec.BooleanValue enableInvulnerability,
             ModConfigSpec.BooleanValue enableFluidSpeed,
             ModConfigSpec.BooleanValue enableRandomTick,
-            ModConfigSpec.BooleanValue enablePortalCooldown
+            ModConfigSpec.BooleanValue enablePortalCooldown,
+            ModConfigSpec.BooleanValue enableClientAnimations
     ) {
         this.minTps = minTps;
         this.disableWatchdog = disableWatchdog;
@@ -157,9 +182,12 @@ public final class TickAccelerateConfig {
         this.enableHurtTime = enableHurtTime;
         this.enableDeathTime = enableDeathTime;
         this.enableAirSupply = enableAirSupply;
+        this.enableSwingSpeed = enableSwingSpeed;
+        this.enableInvulnerability = enableInvulnerability;
         this.enableFluidSpeed = enableFluidSpeed;
         this.enableRandomTick = enableRandomTick;
         this.enablePortalCooldown = enablePortalCooldown;
+        this.enableClientAnimations = enableClientAnimations;
     }
 }
 

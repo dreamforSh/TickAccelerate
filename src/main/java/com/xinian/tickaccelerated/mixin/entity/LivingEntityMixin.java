@@ -38,6 +38,13 @@ public abstract class LivingEntityMixin {
     @Shadow
     public int deathTime;
 
+
+    @Shadow
+    public int swingTime;
+
+    @Shadow
+    public boolean swinging;
+
     @Shadow
     protected int useItemRemaining;
 
@@ -46,6 +53,9 @@ public abstract class LivingEntityMixin {
 
     @Shadow
     public abstract boolean isUsingItem();
+
+    @Shadow
+    public abstract int getCurrentSwingDuration();
 
     /**
      * Compensate hurtTime, airSupply, and attackStrengthTicker at the end of baseTick.
@@ -84,6 +94,42 @@ public abstract class LivingEntityMixin {
             int extra = TpsHelper.computeExtraTicks(multiplier, self.getRandom().nextFloat());
             if (extra > 0) {
                 this.attackStrengthTicker += extra;
+            }
+        }
+
+        // ── invulnerableTime compensation (non-player entities) ──
+        if (TickAccelerateConfig.INSTANCE.enableInvulnerability.get()
+                && !(self instanceof ServerPlayer)
+                && self.invulnerableTime > 0) {
+            int extra = TpsHelper.computeExtraTicks(multiplier, self.getRandom().nextFloat());
+            if (extra > 0) {
+                self.invulnerableTime = Math.max(0, self.invulnerableTime - extra);
+            }
+        }
+    }
+
+    /**
+     * Compensate swingTime at the end of updateSwingTime.
+     * <p>Vanilla: {@code this.swingTime++} per tick. We increment extra ticks
+     * so the attack arm swing animation completes at the correct real-time speed.</p>
+     */
+    @Inject(method = "updateSwingTime", at = @At("TAIL"))
+    private void tickaccelerate$compensateSwingTime(CallbackInfo ci) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if (self.level().isClientSide()) return;
+        if (!TickAccelerateConfig.INSTANCE.enableSwingSpeed.get()) return;
+        if (!this.swinging || this.swingTime <= 0) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        if (multiplier <= 1.0F) return;
+
+        int duration = this.getCurrentSwingDuration();
+        int extra = TpsHelper.computeExtraTicks(multiplier, self.getRandom().nextFloat());
+        if (extra > 0) {
+            this.swingTime += extra;
+            if (this.swingTime >= duration) {
+                this.swingTime = 0;
+                this.swinging = false;
             }
         }
     }
