@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,11 +58,11 @@ public abstract class ServerPlayerGameModeMixin {
     @Redirect(
             method = "handleBlockBreakAction",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)F",
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
                     ordinal = 1)
     )
     private float tickaccelerate$compensateStopDestroyCheck(
-            BlockState state, Player playerArg, Level level, BlockPos pos
+            BlockState state, Player playerArg, BlockGetter level, BlockPos pos
     ) {
         float original = state.getDestroyProgress(playerArg, level, pos);
         if (!TickAccelerateConfig.INSTANCE.enableBlockBreaking.get()) return original;
