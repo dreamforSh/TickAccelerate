@@ -19,7 +19,7 @@ import net.minecraft.world.level.GameRules;
  * TPS, MSPT and all active compensation values.
  *
  * <ul>
- *   <li>{@code /ta} or {@code /ta status} — live performance & compensation dashboard with per-system tick data</li>
+ *   <li>{@code /ta} or {@code /ta status} — live performance & compensation dashboard</li>
  *   <li>{@code /ta config} — list all compensation toggle states</li>
  * </ul>
  */
@@ -47,8 +47,6 @@ public final class TickAccelerateCommand {
         dispatcher.register(root);
         dispatcher.register(alias);
     }
-
-    /* ══════════════════ /ta status ══════════════════ */
 
     private static int showStatus(CommandContext<CommandSourceStack> ctx) {
         MinecraftServer server = ctx.getSource().getServer();
@@ -91,7 +89,7 @@ public final class TickAccelerateCommand {
             // speed-multiplier type: per-tick increment boosted
             MutableComponent line = Component.literal("    ");
             line.append(tickChip("Block Break", cfg.enableBlockBreaking.get(), active,
-                    String.format("×%.1f speed", mult), "Break progress multiplied per tick"));
+                    String.format("×%.1f speed", mult), "gameTicks accelerated for break progress"));
             line.append(lit("  ", ChatFormatting.DARK_GRAY));
             line.append(tickChip("Attack CD", cfg.enableAttackCooldown.get(), active,
                     String.format("×%.1f recovery", mult), "attackStrengthTicker incremented faster"));
@@ -157,7 +155,37 @@ public final class TickAccelerateCommand {
             int iFrames = Math.max(0, Math.round(20 * factor)); // invulnerableTime default=20
             line3.append(tickChip("I-Frames", cfg.enableInvulnerability.get(), active,
                     String.format("20t→%dt", iFrames), "Damage i-frames for non-player entities"));
+            line3.append(lit("  ", ChatFormatting.DARK_GRAY));
+            int fireDur = Math.max(1, Math.round(160 * factor)); // fireDuration default=160
+            line3.append(tickChip("Fire", cfg.enableFireTick.get(), active,
+                    String.format("160t→%dt", fireDur), "Fire duration ticks down faster"));
             src.sendSuccess(() -> line3, false);
+
+            MutableComponent line4 = Component.literal("    ");
+            int boardDur = Math.max(1, Math.round(60 * factor)); // boardingCooldown default=60
+            line4.append(tickChip("Boarding", cfg.enableBoardingCooldown.get(), active,
+                    String.format("60t→%dt", boardDur), "Vehicle boarding cooldown"));
+            line4.append(lit("  ", ChatFormatting.DARK_GRAY));
+            int despawnDur = Math.max(1, Math.round(6000 * factor)); // despawnDelay default=6000
+            line4.append(tickChip("Despawn", cfg.enableItemDespawn.get(), active,
+                    String.format("6000t→%dt", despawnDur), "Item entity despawn timer"));
+            line4.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line4.append(tickChip("XP Orb", cfg.enableXpOrbAge.get(), active,
+                    String.format("×%.1f age", mult), "Experience orb age/despawn"));
+            src.sendSuccess(() -> line4, false);
+
+            MutableComponent line5 = Component.literal("    ");
+            int arrowDur = Math.max(1, Math.round(1200 * factor)); // default arrowLife ≈ 1200
+            line5.append(tickChip("Arrow", cfg.enableArrowLife.get(), active,
+                    String.format("1200t→%dt", arrowDur), "Arrow stuck-in-block despawn timer"));
+            line5.append(lit("  ", ChatFormatting.DARK_GRAY));
+            int breedDur = Math.max(1, Math.round(600 * factor)); // default breedTime ≈ 600
+            line5.append(tickChip("Breed", cfg.enableBreedingTimer.get(), active,
+                    String.format("600t→%dt", breedDur), "Animal breeding 'in love' window"));
+            line5.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line5.append(tickChip("Growth", cfg.enableMobGrowth.get(), active,
+                    String.format("×%.1f rate", mult), "Baby mob growth speed"));
+            src.sendSuccess(() -> line5, false);
         }
 
         // ── World compensations ──
@@ -197,7 +225,7 @@ public final class TickAccelerateCommand {
             MutableComponent line = Component.literal("    ");
             line.append(tickChip("Animations", cfg.enableClientAnimations.get(), active,
                     String.format("×%.1f playback", mult),
-                    "Client-side hurt flash, death anim, swing anim,\ni-frames play at correct real-time speed"));
+                    "Client-side hurt flash, death anim, swing anim play at correct speed"));
             src.sendSuccess(() -> line, false);
         }
 
@@ -245,8 +273,16 @@ public final class TickAccelerateCommand {
                 new boolean[]{cfg.enableHurtTime.get(), cfg.enableDeathTime.get(), cfg.enableAirSupply.get()}
         ), false);
         src.sendSuccess(() -> toggleRow(
-                new String[]{"Swing Speed", "I-Frames"},
-                new boolean[]{cfg.enableSwingSpeed.get(), cfg.enableInvulnerability.get()}
+                new String[]{"Swing Speed", "I-Frames", "Fire Tick"},
+                new boolean[]{cfg.enableSwingSpeed.get(), cfg.enableInvulnerability.get(), cfg.enableFireTick.get()}
+        ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"Boarding CD", "Item Despawn", "XP Orb Age"},
+                new boolean[]{cfg.enableBoardingCooldown.get(), cfg.enableItemDespawn.get(), cfg.enableXpOrbAge.get()}
+        ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"Arrow Life", "Breed Timer", "Mob Growth"},
+                new boolean[]{cfg.enableArrowLife.get(), cfg.enableBreedingTimer.get(), cfg.enableMobGrowth.get()}
         ), false);
 
         // ── World ──

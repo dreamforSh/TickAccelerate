@@ -35,6 +35,13 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableAirSupply;
     public final ModConfigSpec.BooleanValue enableSwingSpeed;
     public final ModConfigSpec.BooleanValue enableInvulnerability;
+    public final ModConfigSpec.BooleanValue enableFireTick;
+    public final ModConfigSpec.BooleanValue enableBoardingCooldown;
+    public final ModConfigSpec.BooleanValue enableItemDespawn;
+    public final ModConfigSpec.BooleanValue enableXpOrbAge;
+    public final ModConfigSpec.BooleanValue enableArrowLife;
+    public final ModConfigSpec.BooleanValue enableBreedingTimer;
+    public final ModConfigSpec.BooleanValue enableMobGrowth;
 
     /* ── world ── */
     public final ModConfigSpec.BooleanValue enableFluidSpeed;
@@ -114,6 +121,28 @@ public final class TickAccelerateConfig {
         var enableInvulnerabilityVal = builder
                 .comment("Compensate damage invulnerability frames (iFrames) for non-player entities.")
                 .define("enableInvulnerability", true);
+        var enableFireTickVal = builder
+                .comment("Compensate fire tick duration so entities stop burning in the same real time.")
+                .define("enableFireTick", true);
+        var enableBoardingCooldownVal = builder
+                .comment("Compensate vehicle boarding cooldown (60 ticks after dismounting).")
+                .define("enableBoardingCooldown", true);
+        var enableItemDespawnVal = builder
+                .comment("Compensate dropped item despawn timer so items despawn in correct real time.",
+                         "Prevents item entity buildup at low TPS.")
+                .define("enableItemDespawn", true);
+        var enableXpOrbAgeVal = builder
+                .comment("Compensate experience orb age/despawn timer.")
+                .define("enableXpOrbAge", true);
+        var enableArrowLifeVal = builder
+                .comment("Compensate arrow life timer (despawn after 60s stuck in block).")
+                .define("enableArrowLife", true);
+        var enableBreedingTimerVal = builder
+                .comment("Compensate animal breeding 'in love' timer (600 ticks = 30 seconds).")
+                .define("enableBreedingTimer", true);
+        var enableMobGrowthVal = builder
+                .comment("Compensate baby mob growth timer so babies grow up in the correct real time.")
+                .define("enableMobGrowth", true);
         builder.pop();
 
         /* ── World ── */
@@ -131,7 +160,7 @@ public final class TickAccelerateConfig {
                 .comment("Compensate day/night cycle progression so the sun and moon move at the correct real-time speed.")
                 .define("enableDayTime", true);
         var enableBlockEntityTickVal = builder
-                .comment("Compensate block entity ticking (furnaces, hoppers, brewing stands, etc) so they process at the correct real-time rate.")
+                .comment("Compensate block entity ticking (furnaces, hoppers, brewing stands, etc).")
                 .define("enableBlockEntityTick", true);
         builder.pop();
 
@@ -154,6 +183,9 @@ public final class TickAccelerateConfig {
                 enablePotionEffectVal, enableItemPickupDelayVal, enablePortalTimeVal,
                 enableHurtTimeVal, enableDeathTimeVal, enableAirSupplyVal,
                 enableSwingSpeedVal, enableInvulnerabilityVal,
+                enableFireTickVal, enableBoardingCooldownVal,
+                enableItemDespawnVal, enableXpOrbAgeVal,
+                enableArrowLifeVal, enableBreedingTimerVal, enableMobGrowthVal,
                 enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal,
                 enableDayTimeVal, enableBlockEntityTickVal,
                 enableClientAnimationsVal
@@ -178,6 +210,13 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableAirSupply,
             ModConfigSpec.BooleanValue enableSwingSpeed,
             ModConfigSpec.BooleanValue enableInvulnerability,
+            ModConfigSpec.BooleanValue enableFireTick,
+            ModConfigSpec.BooleanValue enableBoardingCooldown,
+            ModConfigSpec.BooleanValue enableItemDespawn,
+            ModConfigSpec.BooleanValue enableXpOrbAge,
+            ModConfigSpec.BooleanValue enableArrowLife,
+            ModConfigSpec.BooleanValue enableBreedingTimer,
+            ModConfigSpec.BooleanValue enableMobGrowth,
             ModConfigSpec.BooleanValue enableFluidSpeed,
             ModConfigSpec.BooleanValue enableRandomTick,
             ModConfigSpec.BooleanValue enablePortalCooldown,
@@ -202,6 +241,13 @@ public final class TickAccelerateConfig {
         this.enableAirSupply = enableAirSupply;
         this.enableSwingSpeed = enableSwingSpeed;
         this.enableInvulnerability = enableInvulnerability;
+        this.enableFireTick = enableFireTick;
+        this.enableBoardingCooldown = enableBoardingCooldown;
+        this.enableItemDespawn = enableItemDespawn;
+        this.enableXpOrbAge = enableXpOrbAge;
+        this.enableArrowLife = enableArrowLife;
+        this.enableBreedingTimer = enableBreedingTimer;
+        this.enableMobGrowth = enableMobGrowth;
         this.enableFluidSpeed = enableFluidSpeed;
         this.enableRandomTick = enableRandomTick;
         this.enablePortalCooldown = enablePortalCooldown;

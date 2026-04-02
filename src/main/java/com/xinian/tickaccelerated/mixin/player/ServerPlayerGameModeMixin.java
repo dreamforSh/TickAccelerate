@@ -2,33 +2,24 @@ package com.xinian.tickaccelerated.mixin.player;
 
 import com.xinian.tickaccelerated.config.TickAccelerateConfig;
 import com.xinian.tickaccelerated.util.TpsHelper;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Block breaking TPS compensation.
- * <p>Multiplies destroy progress by {@code 20 / tps} so blocks break in the same real time.</p>
+ * Block breaking TPS compensation via {@code gameTicks} acceleration.
  *
- * <h3>Vanilla logic (ServerPlayerGameMode)</h3>
- * <pre>
- * private float incrementDestroyProgress(BlockState state, BlockPos pos, int startTick) {
- *     int i = this.gameTicks - startTick;
- *     float f = state.getDestroyProgress(this.player, this.player.level(), pos) * (float)(i + 1);
- *     ...
- *     return f;
- * }
- * </pre>
- * We multiply the return value by the speed multiplier.
+ * <h3>Approach</h3>
+ * <p>All block-breaking timing in {@link ServerPlayerGameMode} is driven by
+ * {@code gameTicks}: elapsed ticks = {@code gameTicks - startTick}.</p>
+ * <p>By advancing {@code gameTicks} faster at low TPS, both the incremental
+ * progress path ({@code incrementDestroyProgress}) and the
+ * {@code STOP_DESTROY_BLOCK} validation path are automatically compensated.</p>
  */
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin {
@@ -36,37 +27,23 @@ public abstract class ServerPlayerGameModeMixin {
     @Shadow
     protected ServerPlayer player;
 
+    @Shadow
+    private int gameTicks;
+
+    @Unique
+    private final float[] tickaccelerate$accum = new float[1];
+
     /**
-     * Compensates the return value of {@code incrementDestroyProgress}.
+     * Advances {@code gameTicks} by extra ticks before vanilla's own {@code gameTicks++}.
+     * Uses a deterministic accumulator to avoid stochastic jitter in break progress.
      */
-    @Inject(method = "incrementDestroyProgress", at = @At("RETURN"), cancellable = true)
-    private void tickaccelerate$compensateDestroyProgress(
-            BlockState state, BlockPos pos, int startTick,
-            CallbackInfoReturnable<Float> cir
-    ) {
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void tickaccelerate$compensateGameTicks(CallbackInfo ci) {
         if (!TickAccelerateConfig.INSTANCE.enableBlockBreaking.get()) return;
         float multiplier = TpsHelper.getSpeedMultiplier(this.player);
-        if (multiplier > 1.0F) {
-            cir.setReturnValue(cir.getReturnValue() * multiplier);
+        int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$accum);
+        if (extra > 0) {
+            this.gameTicks += extra;
         }
     }
-
-    /**
-     * Compensates the {@code STOP_DESTROY_BLOCK} validation (2nd {@code getDestroyProgress} call
-     * inside {@code handleBlockBreakAction}).
-     */
-    @Redirect(
-            method = "handleBlockBreakAction",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/level/block/state/BlockState;getDestroyProgress(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
-                    ordinal = 1)
-    )
-    private float tickaccelerate$compensateStopDestroyCheck(
-            BlockState state, Player playerArg, BlockGetter level, BlockPos pos
-    ) {
-        float original = state.getDestroyProgress(playerArg, level, pos);
-        if (!TickAccelerateConfig.INSTANCE.enableBlockBreaking.get()) return original;
-        return original * TpsHelper.getSpeedMultiplier(this.player);
-    }
 }
-

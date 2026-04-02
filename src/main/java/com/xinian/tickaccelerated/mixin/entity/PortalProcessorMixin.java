@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PortalProcessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -16,16 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <h3>Vanilla logic (PortalProcessor.processPortalTeleportation)</h3>
  * <pre>
- * if (!this.insidePortalThisTick) {
- *     this.decayTick();
- *     return false;
- * } else {
- *     this.insidePortalThisTick = false;
- *     return canChangeDimensions && this.portalTime++ >= threshold;
- * }
+ * if (!this.insidePortalThisTick) { this.decayTick(); return false; }
+ * else { this.insidePortalThisTick = false;
+ *        return canChangeDimensions && this.portalTime++ >= threshold; }
  * </pre>
- * We add extra increments to {@code portalTime} before vanilla's check,
- * so the portal transition completes in the same real time.
+ * <p>We add extra increments to {@code portalTime} before vanilla's check.</p>
  */
 @Mixin(PortalProcessor.class)
 public abstract class PortalProcessorMixin {
@@ -35,6 +31,9 @@ public abstract class PortalProcessorMixin {
 
     @Shadow
     private boolean insidePortalThisTick;
+
+    @Unique
+    private final float[] tickaccelerate$portalAccum = new float[1];
 
     /**
      * Add extra portalTime increments at HEAD of processPortalTeleportation.
@@ -49,10 +48,9 @@ public abstract class PortalProcessorMixin {
         if (!TickAccelerateConfig.INSTANCE.enablePortalTime.get()) return;
 
         float multiplier = TpsHelper.getSpeedMultiplier(entity);
-        int extra = TpsHelper.computeExtraTicks(multiplier, entity.getRandom().nextFloat());
+        int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$portalAccum);
         if (extra > 0) {
             this.portalTime += extra;
         }
     }
 }
-

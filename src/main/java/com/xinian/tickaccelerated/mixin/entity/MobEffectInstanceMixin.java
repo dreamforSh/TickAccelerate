@@ -6,6 +6,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -15,14 +16,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  *
  * <h3>Vanilla logic (MobEffectInstance.tick)</h3>
  * <pre>
- * public boolean tick(LivingEntity entity, Runnable onUpdate) {
- *     ...
- *     this.tickDownDuration();   // duration--
- *     ...
- * }
+ * this.tickDownDuration();   // duration--
  * </pre>
- * We subtract extra ticks from {@code duration} after vanilla's single decrement,
- * so effects expire in the same real time regardless of TPS.
+ * <p>We subtract extra ticks from {@code duration} so effects expire
+ * in the same real time regardless of TPS.</p>
  */
 @Mixin(MobEffectInstance.class)
 public abstract class MobEffectInstanceMixin {
@@ -33,9 +30,9 @@ public abstract class MobEffectInstanceMixin {
     @Shadow
     public abstract boolean isInfiniteDuration();
 
-    /**
-     * After vanilla decrements duration by 1, we decrement it further based on TPS.
-     */
+    @Unique
+    private final float[] tickaccelerate$potionAccum = new float[1];
+
     @Inject(method = "tick", at = @At("TAIL"))
     private void tickaccelerate$compensatePotionDuration(
             LivingEntity entity, Runnable onUpdate,
@@ -46,10 +43,9 @@ public abstract class MobEffectInstanceMixin {
         if (this.isInfiniteDuration() || this.duration <= 0) return;
 
         float multiplier = TpsHelper.getSpeedMultiplier(entity);
-        int extra = TpsHelper.computeExtraTicks(multiplier, entity.getRandom().nextFloat());
+        int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$potionAccum);
         if (extra > 0) {
             this.duration = Math.max(0, this.duration - extra);
         }
     }
 }
-
