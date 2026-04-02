@@ -1,9 +1,18 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.xinian.mixin",
+  "package": "com.xinian.tickaccelerated.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "ServerPlayerGameModeMixin",
+    "LivingEntityMixin",
+    "PlayerMixin",
+    "ItemCooldownsMixin",
+    "FoodDataMixin",
+    "DedicatedServerMixin",
+    "MobEffectInstanceMixin",
+    "ItemEntityMixin",
+    "PortalProcessorMixin"
   ],
   "client": [
   ],
