@@ -1,5 +1,6 @@
-package com.xinian.tickaccelerated;
+package com.xinian.tickaccelerated.util;
 
+import com.xinian.tickaccelerated.config.TickAccelerateConfig;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 
@@ -13,6 +14,8 @@ public final class TpsHelper {
     public static final float MAX_TPS = 20.0F;
 
     private TpsHelper() {}
+
+    /* ──────────────────── TPS query ──────────────────── */
 
     /**
      * Returns the current server TPS, clamped to [minTps, 20].
@@ -34,6 +37,8 @@ public final class TpsHelper {
         return getTps(entity.level().getServer());
     }
 
+    /* ──────────── Tick‑count scaling (duration → fewer ticks) ──────────── */
+
     /**
      * Tick count scaling factor: {@code tps / 20}.
      * <p>Range: [minTps/20, 1.0]. Multiply original tick counts by this.</p>
@@ -51,6 +56,8 @@ public final class TpsHelper {
     public static float getTickFactor(Entity entity) {
         return getTps(entity) / MAX_TPS;
     }
+
+    /* ──────────── Per‑tick speed multiplier (increment → faster) ──────────── */
 
     /**
      * Per-tick speed multiplier: {@code 20 / tps}.
@@ -70,6 +77,29 @@ public final class TpsHelper {
         return MAX_TPS / getTps(entity);
     }
 
+    /* ──────────── Stochastic extra‑tick helper ──────────── */
+
+    /**
+     * Computes how many <em>extra</em> ticks to apply on top of vanilla's single decrement/increment.
+     * Uses stochastic rounding for the fractional part.
+     *
+     * @param multiplier speed multiplier ({@code >= 1.0})
+     * @param random     a random float in [0, 1)
+     * @return extra ticks to add (0 when multiplier &lt;= 1)
+     */
+    public static int computeExtraTicks(float multiplier, float random) {
+        if (multiplier <= 1.0F) return 0;
+        float extra = multiplier - 1.0F;
+        int whole = (int) extra;
+        float fraction = extra - whole;
+        if (fraction > 0 && random < fraction) {
+            whole++;
+        }
+        return whole;
+    }
+
+    /* ──────────── Config accessor ──────────── */
+
     private static float getMinTps() {
         try {
             return TickAccelerateConfig.INSTANCE.minTps.get().floatValue();
@@ -78,3 +108,4 @@ public final class TpsHelper {
         }
     }
 }
+

@@ -1,7 +1,7 @@
-package com.xinian.tickaccelerated.mixin;
+package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.TickAccelerateConfig;
-import com.xinian.tickaccelerated.TpsHelper;
+import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ServerItemCooldowns;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -11,14 +11,18 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
  * Item cooldown TPS compensation (ender pearl, chorus fruit, wind charge, shield, etc).
- * <p>Scales cooldown tick count: {@code newTicks = originalTicks * tps / 20}.</p>
+ *
+ * <h3>Vanilla logic (ItemCooldowns.addCooldown)</h3>
+ * <pre>
+ * public void addCooldown(Item item, int ticks) {
+ *     this.cooldowns.put(item, new CooldownInstance(this.tickCount, this.tickCount + ticks));
+ * }
+ * </pre>
+ * We scale the {@code ticks} parameter: {@code newTicks = ticks * tps / 20}.
  */
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin {
 
-    /**
-     * Modifies the cooldown tick parameter in {@code addCooldown}. Server-side only.
-     */
     @ModifyVariable(method = "addCooldown", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private int tickaccelerate$compensateCooldownTicks(int originalTicks) {
         if (!((Object) this instanceof ServerItemCooldowns)) return originalTicks;
@@ -30,3 +34,4 @@ public abstract class ItemCooldownsMixin {
         return Math.max(1, Math.round(originalTicks * tickFactor));
     }
 }
+

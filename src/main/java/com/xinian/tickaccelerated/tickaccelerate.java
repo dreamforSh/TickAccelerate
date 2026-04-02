@@ -1,6 +1,7 @@
 package com.xinian.tickaccelerated;
 
 import com.mojang.logging.LogUtils;
+import com.xinian.tickaccelerated.config.TickAccelerateConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -8,17 +9,19 @@ import net.neoforged.fml.config.ModConfig;
 import org.slf4j.Logger;
 
 /**
- * Tickaccelerate mod entry point.
- * <p>Registers the server-side configuration on startup.</p>
+ * Tick Accelerate mod entry point.
+ * <p>Registers the server-side configuration on startup.
+ * All TPS compensation is handled through Mixin classes.</p>
  */
-@Mod(tickaccelerate.MODID)
-public class tickaccelerate {
+@Mod(TickAccelerate.MODID)
+public class TickAccelerate {
 
     public static final String MODID = "tickaccelerate";
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public tickaccelerate(IEventBus modEventBus, ModContainer modContainer) {
+    public TickAccelerate(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.SERVER, TickAccelerateConfig.SPEC);
-        LOGGER.info("Tickaccelerate mod initialized - TPS compensation via Mixin active");
+        LOGGER.info("Tick Accelerate initialized – TPS compensation via Mixin active");
     }
 }
+

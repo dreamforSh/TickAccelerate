@@ -1,7 +1,7 @@
-package com.xinian.tickaccelerated.mixin;
+package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.TickAccelerateConfig;
-import com.xinian.tickaccelerated.TpsHelper;
+import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +12,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Natural regeneration / starvation timer TPS compensation.
- * <p>Each tick increments {@code tickTimer} by {@code 20 / tps} instead of 1.</p>
+ *
+ * <h3>Vanilla logic (FoodData.tick)</h3>
+ * <pre>
+ * // inside three branches, vanilla does:
+ * this.tickTimer++;
+ * if (this.tickTimer >= threshold) { heal / starve; this.tickTimer = 0; }
+ * </pre>
+ * We add extra increments to {@code tickTimer} so the healing/starvation
+ * happens in the same real time regardless of TPS.
  */
 @Mixin(FoodData.class)
 public abstract class FoodDataMixin {
@@ -20,9 +28,6 @@ public abstract class FoodDataMixin {
     @Shadow
     private int tickTimer;
 
-    /**
-     * After vanilla increments {@code tickTimer}, apply extra increments.
-     */
     @Inject(method = "tick", at = @At("TAIL"))
     private void tickaccelerate$compensateFoodTimer(Player player, CallbackInfo ci) {
         if (player.level().isClientSide()) return;
@@ -30,15 +35,10 @@ public abstract class FoodDataMixin {
         if (this.tickTimer <= 0) return;
 
         float multiplier = TpsHelper.getSpeedMultiplier(player);
-        if (multiplier <= 1.0F) return;
-
-        int extraTicks = (int) (multiplier - 1.0F);
-        float fraction = multiplier - 1.0F - extraTicks;
-        if (fraction > 0 && player.getRandom().nextFloat() < fraction) {
-            extraTicks++;
-        }
-        if (extraTicks > 0) {
-            this.tickTimer += extraTicks;
+        int extra = TpsHelper.computeExtraTicks(multiplier, player.getRandom().nextFloat());
+        if (extra > 0) {
+            this.tickTimer += extra;
         }
     }
 }
+
