@@ -12,7 +12,11 @@
     "entity.LivingEntityMixin",
     "entity.MobEffectInstanceMixin",
     "entity.ItemEntityMixin",
-    "entity.PortalProcessorMixin"
+    "entity.PortalProcessorMixin",
+    "entity.EntityMixin",
+    "world.ServerLevelMixin",
+    "world.FlowingFluidMixin",
+    "world.LavaFluidMixin"
   ],
   "client": [
   ],

@@ -33,6 +33,11 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableDeathTime;
     public final ModConfigSpec.BooleanValue enableAirSupply;
 
+    /* ── world ── */
+    public final ModConfigSpec.BooleanValue enableFluidSpeed;
+    public final ModConfigSpec.BooleanValue enableRandomTick;
+    public final ModConfigSpec.BooleanValue enablePortalCooldown;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -94,6 +99,19 @@ public final class TickAccelerateConfig {
                 .define("enableAirSupply", true);
         builder.pop();
 
+        /* ── World ── */
+        builder.comment("World-level compensations").push("world");
+        var enableFluidSpeedVal = builder
+                .comment("Compensate fluid (water/lava) spread tick delay so fluids flow at the same real-time speed.")
+                .define("enableFluidSpeed", true);
+        var enableRandomTickVal = builder
+                .comment("Compensate random tick speed (crop growth, leaf decay, etc) so they progress at the same real-time rate.")
+                .define("enableRandomTick", true);
+        var enablePortalCooldownVal = builder
+                .comment("Compensate portal re-entry cooldown so it lasts the same real time after teleportation.")
+                .define("enablePortalCooldown", true);
+        builder.pop();
+
         SPEC = builder.build();
 
         INSTANCE = new TickAccelerateConfig(
@@ -101,7 +119,8 @@ public final class TickAccelerateConfig {
                 enableBlockBreakingVal, enableAttackCooldownVal, enableFoodRegenVal,
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
                 enablePotionEffectVal, enableItemPickupDelayVal, enablePortalTimeVal,
-                enableHurtTimeVal, enableDeathTimeVal, enableAirSupplyVal
+                enableHurtTimeVal, enableDeathTimeVal, enableAirSupplyVal,
+                enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal
         );
     }
 
@@ -119,7 +138,10 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enablePortalTime,
             ModConfigSpec.BooleanValue enableHurtTime,
             ModConfigSpec.BooleanValue enableDeathTime,
-            ModConfigSpec.BooleanValue enableAirSupply
+            ModConfigSpec.BooleanValue enableAirSupply,
+            ModConfigSpec.BooleanValue enableFluidSpeed,
+            ModConfigSpec.BooleanValue enableRandomTick,
+            ModConfigSpec.BooleanValue enablePortalCooldown
     ) {
         this.minTps = minTps;
         this.disableWatchdog = disableWatchdog;
@@ -135,6 +157,9 @@ public final class TickAccelerateConfig {
         this.enableHurtTime = enableHurtTime;
         this.enableDeathTime = enableDeathTime;
         this.enableAirSupply = enableAirSupply;
+        this.enableFluidSpeed = enableFluidSpeed;
+        this.enableRandomTick = enableRandomTick;
+        this.enablePortalCooldown = enablePortalCooldown;
     }
 }
 

@@ -122,6 +122,14 @@ public final class TickAccelerateCommand {
         ctx.getSource().sendSuccess(() -> toggle("Death Time", cfg.enableDeathTime.get()), false);
         ctx.getSource().sendSuccess(() -> toggle("Air Supply", cfg.enableAirSupply.get()), false);
 
+        // World
+        ctx.getSource().sendSuccess(() -> separator(), false);
+        ctx.getSource().sendSuccess(() ->
+                Component.literal("  World").withStyle(ChatFormatting.GOLD), false);
+        ctx.getSource().sendSuccess(() -> toggle("Fluid Speed", cfg.enableFluidSpeed.get()), false);
+        ctx.getSource().sendSuccess(() -> toggle("Random Tick", cfg.enableRandomTick.get()), false);
+        ctx.getSource().sendSuccess(() -> toggle("Portal Cooldown", cfg.enablePortalCooldown.get()), false);
+
         return 1;
     }
 
