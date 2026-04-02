@@ -113,6 +113,12 @@ public final class TickAccelerateCommand {
             line2.append(tickChip("XP Delay", cfg.enableXpPickupDelay.get(), active,
                     String.format("×%.1f drain", mult), "takeXpDelay decremented faster"));
             src.sendSuccess(() -> line2, false);
+
+            MutableComponent line3 = Component.literal("    ");
+            int sleepTicks = Math.max(1, Math.round(100 * factor)); // sleepCounter threshold=100
+            line3.append(tickChip("Sleep", cfg.enableSleepTimer.get(), active,
+                    String.format("100t→%dt", sleepTicks), "Sleep timer incremented faster"));
+            src.sendSuccess(() -> line3, false);
         }
 
         // ── Entity compensations ──
@@ -176,6 +182,12 @@ public final class TickAccelerateCommand {
             int portalCD = Math.max(0, Math.round(10 * factor)); // player portal cooldown=10
             line2.append(tickChip("Portal CD", cfg.enablePortalCooldown.get(), active,
                     String.format("10t→%dt", portalCD), "Portal re-entry cooldown (player)"));
+            line2.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line2.append(tickChip("Day Time", cfg.enableDayTime.get(), active,
+                    String.format("×%.1f speed", mult), "Day/night cycle progression speed"));
+            line2.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line2.append(tickChip("Block Entity", cfg.enableBlockEntityTick.get(), active,
+                    String.format("×%.1f tick", mult), "Furnace, hopper, brewing stand, etc."));
             src.sendSuccess(() -> line2, false);
         }
 
@@ -220,6 +232,7 @@ public final class TickAccelerateCommand {
                 new String[]{"Item Use", "Item CD", "XP Delay"},
                 new boolean[]{cfg.enableItemUse.get(), cfg.enableItemCooldown.get(), cfg.enableXpPickupDelay.get()}
         ), false);
+        src.sendSuccess(() -> toggleRow("Sleep Timer", cfg.enableSleepTimer.get()), false);
 
         // ── Entity ──
         src.sendSuccess(() -> sectionHeader("Entity"), false);
@@ -241,6 +254,10 @@ public final class TickAccelerateCommand {
         src.sendSuccess(() -> toggleRow(
                 new String[]{"Fluid Flow", "Random Tick", "Portal CD"},
                 new boolean[]{cfg.enableFluidSpeed.get(), cfg.enableRandomTick.get(), cfg.enablePortalCooldown.get()}
+        ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"Day Time", "Block Entity"},
+                new boolean[]{cfg.enableDayTime.get(), cfg.enableBlockEntityTick.get()}
         ), false);
 
         // ── Client ──

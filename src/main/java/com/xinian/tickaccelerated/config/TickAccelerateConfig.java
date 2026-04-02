@@ -24,6 +24,7 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableItemUse;
     public final ModConfigSpec.BooleanValue enableItemCooldown;
     public final ModConfigSpec.BooleanValue enableXpPickupDelay;
+    public final ModConfigSpec.BooleanValue enableSleepTimer;
 
     /* ── entity ── */
     public final ModConfigSpec.BooleanValue enablePotionEffect;
@@ -39,6 +40,8 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableFluidSpeed;
     public final ModConfigSpec.BooleanValue enableRandomTick;
     public final ModConfigSpec.BooleanValue enablePortalCooldown;
+    public final ModConfigSpec.BooleanValue enableDayTime;
+    public final ModConfigSpec.BooleanValue enableBlockEntityTick;
 
     /* ── client ── */
     public final ModConfigSpec.BooleanValue enableClientAnimations;
@@ -80,6 +83,9 @@ public final class TickAccelerateConfig {
         var enableXpPickupDelayVal = builder
                 .comment("Compensate experience orb pickup delay.")
                 .define("enableXpPickupDelay", true);
+        var enableSleepTimerVal = builder
+                .comment("Compensate sleep timer so the player falls asleep in the same real time.")
+                .define("enableSleepTimer", true);
         builder.pop();
 
         /* ── Entity ── */
@@ -121,6 +127,12 @@ public final class TickAccelerateConfig {
         var enablePortalCooldownVal = builder
                 .comment("Compensate portal re-entry cooldown so it lasts the same real time after teleportation.")
                 .define("enablePortalCooldown", true);
+        var enableDayTimeVal = builder
+                .comment("Compensate day/night cycle progression so the sun and moon move at the correct real-time speed.")
+                .define("enableDayTime", true);
+        var enableBlockEntityTickVal = builder
+                .comment("Compensate block entity ticking (furnaces, hoppers, brewing stands, etc) so they process at the correct real-time rate.")
+                .define("enableBlockEntityTick", true);
         builder.pop();
 
         /* ── Client ── */
@@ -138,10 +150,12 @@ public final class TickAccelerateConfig {
                 minTpsVal, disableWatchdogVal,
                 enableBlockBreakingVal, enableAttackCooldownVal, enableFoodRegenVal,
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
+                enableSleepTimerVal,
                 enablePotionEffectVal, enableItemPickupDelayVal, enablePortalTimeVal,
                 enableHurtTimeVal, enableDeathTimeVal, enableAirSupplyVal,
                 enableSwingSpeedVal, enableInvulnerabilityVal,
                 enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal,
+                enableDayTimeVal, enableBlockEntityTickVal,
                 enableClientAnimationsVal
         );
     }
@@ -155,6 +169,7 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableItemUse,
             ModConfigSpec.BooleanValue enableItemCooldown,
             ModConfigSpec.BooleanValue enableXpPickupDelay,
+            ModConfigSpec.BooleanValue enableSleepTimer,
             ModConfigSpec.BooleanValue enablePotionEffect,
             ModConfigSpec.BooleanValue enableItemPickupDelay,
             ModConfigSpec.BooleanValue enablePortalTime,
@@ -166,6 +181,8 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableFluidSpeed,
             ModConfigSpec.BooleanValue enableRandomTick,
             ModConfigSpec.BooleanValue enablePortalCooldown,
+            ModConfigSpec.BooleanValue enableDayTime,
+            ModConfigSpec.BooleanValue enableBlockEntityTick,
             ModConfigSpec.BooleanValue enableClientAnimations
     ) {
         this.minTps = minTps;
@@ -176,6 +193,7 @@ public final class TickAccelerateConfig {
         this.enableItemUse = enableItemUse;
         this.enableItemCooldown = enableItemCooldown;
         this.enableXpPickupDelay = enableXpPickupDelay;
+        this.enableSleepTimer = enableSleepTimer;
         this.enablePotionEffect = enablePotionEffect;
         this.enableItemPickupDelay = enableItemPickupDelay;
         this.enablePortalTime = enablePortalTime;
@@ -187,6 +205,8 @@ public final class TickAccelerateConfig {
         this.enableFluidSpeed = enableFluidSpeed;
         this.enableRandomTick = enableRandomTick;
         this.enablePortalCooldown = enablePortalCooldown;
+        this.enableDayTime = enableDayTime;
+        this.enableBlockEntityTick = enableBlockEntityTick;
         this.enableClientAnimations = enableClientAnimations;
     }
 }

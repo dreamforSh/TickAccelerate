@@ -16,7 +16,8 @@
     "entity.EntityMixin",
     "world.ServerLevelMixin",
     "world.FlowingFluidMixin",
-    "world.LavaFluidMixin"
+    "world.LavaFluidMixin",
+    "world.BlockEntityTickMixin"
   ],
   "client": [
     "client.ClientLevelMixin",
