@@ -1,10 +1,12 @@
 package com.xinian.tickaccelerated.mixin.world;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -26,20 +28,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin {
 
+    @Unique
+    private final float[] tickaccelerate$dayTimeAccum = new float[1];
+
     /**
      * Multiply the {@code randomTickSpeed} parameter by the speed multiplier.
      */
     @ModifyVariable(method = "tickChunk", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private int tickaccelerate$compensateRandomTickSpeed(int randomTickSpeed) {
         if (randomTickSpeed <= 0) return randomTickSpeed;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableRandomTick.get()) return randomTickSpeed;
-        } catch (Exception e) {
-            return randomTickSpeed;
-        }
 
         ServerLevel self = (ServerLevel) (Object) this;
-        float multiplier = TpsHelper.getSpeedMultiplier(self.getServer());
+        MinecraftServer server = self.getServer();
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableRandomTick) return randomTickSpeed;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return randomTickSpeed;
 
         float scaled = randomTickSpeed * multiplier;
@@ -60,19 +65,17 @@ public abstract class ServerLevelMixin {
     @Inject(method = "tickTime", at = @At("TAIL"))
     private void tickaccelerate$compensateDayTime(CallbackInfo ci) {
         ServerLevel self = (ServerLevel) (Object) this;
+        MinecraftServer server = self.getServer();
 
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableDayTime.get()) return;
-        } catch (Exception e) {
-            return;
-        }
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableDayTime) return;
 
         if (!self.getGameRules().getBoolean(GameRules.RULE_DAYLIGHT)) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self.getServer());
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return;
 
-        int extra = TpsHelper.computeExtraTicks(multiplier, self.getRandom().nextFloat());
+        int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$dayTimeAccum);
         if (extra > 0) {
             self.setDayTime(self.getLevelData().getDayTime() + extra);
         }

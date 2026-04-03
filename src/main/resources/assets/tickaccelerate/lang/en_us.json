@@ -49,6 +49,10 @@
   "tickaccelerate.feature.portal_cd": "Portal CD",
   "tickaccelerate.feature.day_time": "Day Time",
   "tickaccelerate.feature.block_entity": "Block Entity",
+  "tickaccelerate.feature.weather": "Weather",
+  "tickaccelerate.feature.spawner": "Spawner",
+  "tickaccelerate.feature.tnt_fuse": "TNT Fuse",
+  "tickaccelerate.feature.falling_block": "Falling Block",
   "tickaccelerate.feature.animations": "Animations",
   "tickaccelerate.feature.watchdog": "Watchdog",
 
@@ -80,6 +84,10 @@
   "tickaccelerate.hover.portal_cd": "Portal re-entry cooldown (player)",
   "tickaccelerate.hover.day_time": "Day/night cycle progression speed",
   "tickaccelerate.hover.block_entity": "Furnace, hopper, brewing stand, etc.",
+  "tickaccelerate.hover.weather": "Rain/thunder/clear weather cycle timers",
+  "tickaccelerate.hover.spawner": "Mob spawner spawn delay countdown",
+  "tickaccelerate.hover.tnt_fuse": "TNT fuse countdown (default 80 ticks = 4s)",
+  "tickaccelerate.hover.falling_block": "Falling block time counter (sand, gravel, anvil)",
   "tickaccelerate.hover.animations": "Client-side hurt flash, death anim, swing anim play at correct speed",
 
   "tickaccelerate.val.block_break": "×%s speed",
@@ -110,5 +118,9 @@
   "tickaccelerate.val.portal_cd": "%st→%st",
   "tickaccelerate.val.day_time": "×%s speed",
   "tickaccelerate.val.block_entity": "×%s tick",
+  "tickaccelerate.val.weather": "×%s cycle",
+  "tickaccelerate.val.spawner": "×%s delay",
+  "tickaccelerate.val.tnt_fuse": "%st→%st",
+  "tickaccelerate.val.falling_block": "×%s time",
   "tickaccelerate.val.animations": "×%s playback"
 }

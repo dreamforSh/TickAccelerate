@@ -191,6 +191,15 @@ public final class TickAccelerateCommand {
             line5.append(tickChip("growth", cfg.enableMobGrowth.get(), active,
                     String.format("%.1f", mult)));
             src.sendSuccess(() -> line5, false);
+
+            MutableComponent line6 = Component.literal("    ");
+            int tntFuse = Math.max(1, Math.round(80 * factor));
+            line6.append(tickChip("tnt_fuse", cfg.enableTntFuse.get(), active,
+                    "80", String.valueOf(tntFuse)));
+            line6.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line6.append(tickChip("falling_block", cfg.enableFallingBlock.get(), active,
+                    String.format("%.1f", mult)));
+            src.sendSuccess(() -> line6, false);
         }
 
         // ── World compensations ──
@@ -221,6 +230,14 @@ public final class TickAccelerateCommand {
             line2.append(tickChip("block_entity", cfg.enableBlockEntityTick.get(), active,
                     String.format("%.1f", mult)));
             src.sendSuccess(() -> line2, false);
+
+            MutableComponent line3 = Component.literal("    ");
+            line3.append(tickChip("weather", cfg.enableWeatherCycle.get(), active,
+                    String.format("%.1f", mult)));
+            line3.append(lit("  ", ChatFormatting.DARK_GRAY));
+            line3.append(tickChip("spawner", cfg.enableSpawnerCooldown.get(), active,
+                    String.format("%.1f", mult)));
+            src.sendSuccess(() -> line3, false);
         }
 
         // ── Client animation compensations ──
@@ -288,6 +305,10 @@ public final class TickAccelerateCommand {
                 new String[]{"arrow", "breed", "growth"},
                 new boolean[]{cfg.enableArrowLife.get(), cfg.enableBreedingTimer.get(), cfg.enableMobGrowth.get()}
         ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"tnt_fuse", "falling_block"},
+                new boolean[]{cfg.enableTntFuse.get(), cfg.enableFallingBlock.get()}
+        ), false);
 
         // ── World ──
         src.sendSuccess(() -> sectionHeader("tickaccelerate.cmd.section.world"), false);
@@ -298,6 +319,10 @@ public final class TickAccelerateCommand {
         src.sendSuccess(() -> toggleRow(
                 new String[]{"day_time", "block_entity"},
                 new boolean[]{cfg.enableDayTime.get(), cfg.enableBlockEntityTick.get()}
+        ), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"weather", "spawner"},
+                new boolean[]{cfg.enableWeatherCycle.get(), cfg.enableSpawnerCooldown.get()}
         ), false);
 
         // ── Client ──

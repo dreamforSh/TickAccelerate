@@ -1,6 +1,6 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -45,9 +45,11 @@ public abstract class PortalProcessorMixin {
             CallbackInfoReturnable<Boolean> cir
     ) {
         if (!this.insidePortalThisTick) return;
-        if (!TickAccelerateConfig.INSTANCE.enablePortalTime.get()) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(entity);
+        ConfigSnapshot config = ConfigSnapshot.get(level.getServer());
+        if (!config.enablePortalTime) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(level.getServer());
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$portalAccum);
         if (extra > 0) {
             this.portalTime += extra;

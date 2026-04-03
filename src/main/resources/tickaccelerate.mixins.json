@@ -18,14 +18,19 @@
     "entity.ArrowMixin",
     "entity.AnimalMixin",
     "entity.AgeableMobMixin",
+    "entity.PrimedTntMixin",
+    "entity.FallingBlockMixin",
     "world.ServerLevelMixin",
     "world.FlowingFluidMixin",
     "world.LavaFluidMixin",
-    "world.BlockEntityTickMixin"
+    "world.BlockEntityTickMixin",
+    "world.WeatherMixin",
+    "world.BaseSpawnerMixin"
   ],
   "client": [
     "client.ClientLevelMixin",
-    "client.ClientLivingEntityMixin"
+    "client.ClientLivingEntityMixin",
+    "client.ClientDisconnectMixin"
   ],
   "injectors": {
     "defaultRequire": 1

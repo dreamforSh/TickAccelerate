@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,11 +46,14 @@ public abstract class AgeableMobMixin {
         AgeableMob self = (AgeableMob) (Object) this;
         if (self.level().isClientSide()) return;
         if (!self.isAlive()) return;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableMobGrowth.get()) return;
-        } catch (Exception e) { return; }
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableMobGrowth) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$growthAccum);
         if (extra <= 0) return;
 
@@ -62,4 +66,3 @@ public abstract class AgeableMobMixin {
         }
     }
 }
-

@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,15 +40,17 @@ public abstract class ArrowMixin {
         AbstractArrow self = (AbstractArrow) (Object) this;
         if (self.level().isClientSide()) return;
         if (this.life <= 0) return;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableArrowLife.get()) return;
-        } catch (Exception e) { return; }
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableArrowLife) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$lifeAccum);
         if (extra > 0) {
             this.life += extra;
         }
     }
 }
-

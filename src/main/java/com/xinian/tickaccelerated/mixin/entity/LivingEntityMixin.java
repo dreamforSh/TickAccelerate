@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -71,17 +72,21 @@ public abstract class LivingEntityMixin {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self.level().isClientSide()) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return;
 
-        if (TickAccelerateConfig.INSTANCE.enableHurtTime.get() && this.hurtTime > 0) {
+        if (config.enableHurtTime && this.hurtTime > 0) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$hurtAccum);
             if (extra > 0) {
                 this.hurtTime = Math.max(0, this.hurtTime - extra);
             }
         }
 
-        if (TickAccelerateConfig.INSTANCE.enableAirSupply.get()) {
+        if (config.enableAirSupply) {
             int air = self.getAirSupply();
             int maxAir = self.getMaxAirSupply();
             if (air < maxAir && air > 0) {
@@ -92,7 +97,7 @@ public abstract class LivingEntityMixin {
             }
         }
 
-        if (TickAccelerateConfig.INSTANCE.enableInvulnerability.get()
+        if (config.enableInvulnerability
                 && !(self instanceof ServerPlayer)
                 && self.invulnerableTime > 0) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$iFrameAccum);
@@ -101,7 +106,7 @@ public abstract class LivingEntityMixin {
             }
         }
 
-        if (self instanceof ServerPlayer && TickAccelerateConfig.INSTANCE.enableAttackCooldown.get()) {
+        if (self instanceof ServerPlayer && config.enableAttackCooldown) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$attackAccum);
             if (extra > 0) {
                 this.attackStrengthTicker += extra;
@@ -116,10 +121,15 @@ public abstract class LivingEntityMixin {
     private void tickaccelerate$compensateSwingTime(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self.level().isClientSide()) return;
-        if (!TickAccelerateConfig.INSTANCE.enableSwingSpeed.get()) return;
+
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableSwingSpeed) return;
         if (!this.swinging || this.swingTime <= 0) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return;
 
         int duration = this.getCurrentSwingDuration();
@@ -140,9 +150,14 @@ public abstract class LivingEntityMixin {
     private void tickaccelerate$compensateDeathTime(CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self.level().isClientSide()) return;
-        if (!TickAccelerateConfig.INSTANCE.enableDeathTime.get()) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableDeathTime) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$deathAccum);
         if (extra > 0) {
             this.deathTime += extra;
@@ -157,10 +172,15 @@ public abstract class LivingEntityMixin {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self.level().isClientSide()) return;
         if (!(self instanceof ServerPlayer)) return;
-        if (!TickAccelerateConfig.INSTANCE.enableItemUse.get()) return;
+
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableItemUse) return;
         if (!this.isUsingItem() || this.useItemRemaining <= 1) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$useAccum);
         if (extra > 0) {
             this.useItemRemaining = Math.max(1, this.useItemRemaining - extra);

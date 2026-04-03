@@ -1,6 +1,6 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
@@ -50,12 +50,12 @@ public abstract class EntityMixin {
         Entity self = (Entity) (Object) this;
         if (self.level().isClientSide()) return;
         if (this.getPortalCooldown() <= 0) return;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enablePortalCooldown.get()) return;
-        } catch (Exception e) { return; }
 
         MinecraftServer server = self.level().getServer();
         if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enablePortalCooldown) return;
 
         float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$portalAccum);
@@ -77,26 +77,19 @@ public abstract class EntityMixin {
         MinecraftServer server = self.level().getServer();
         if (server == null) return;
 
+        ConfigSnapshot config = ConfigSnapshot.get(server);
         float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return;
 
         int fireTicks = this.getRemainingFireTicks();
-        if (fireTicks > 0) {
-            try {
-                if (!TickAccelerateConfig.INSTANCE.enableFireTick.get()) return;
-            } catch (Exception e) { return; }
-
+        if (fireTicks > 0 && config.enableFireTick) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$fireAccum);
             if (extra > 0) {
                 this.setRemainingFireTicks(Math.max(0, fireTicks - extra));
             }
         }
 
-        if (this.boardingCooldown > 0) {
-            try {
-                if (!TickAccelerateConfig.INSTANCE.enableBoardingCooldown.get()) return;
-            } catch (Exception e) { return; }
-
+        if (this.boardingCooldown > 0 && config.enableBoardingCooldown) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$boardingAccum);
             if (extra > 0) {
                 this.boardingCooldown = Math.max(0, this.boardingCooldown - extra);

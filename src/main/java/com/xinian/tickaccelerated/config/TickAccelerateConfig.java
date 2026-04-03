@@ -13,6 +13,7 @@ public final class TickAccelerateConfig {
 
     /* ── general ── */
     public final ModConfigSpec.DoubleValue minTps;
+    public final ModConfigSpec.DoubleValue tpsSmoothingAlpha;
     public final ModConfigSpec.ConfigValue<String> serverLocale;
 
     /* ── server ── */
@@ -43,6 +44,8 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enableArrowLife;
     public final ModConfigSpec.BooleanValue enableBreedingTimer;
     public final ModConfigSpec.BooleanValue enableMobGrowth;
+    public final ModConfigSpec.BooleanValue enableTntFuse;
+    public final ModConfigSpec.BooleanValue enableFallingBlock;
 
     /* ── world ── */
     public final ModConfigSpec.BooleanValue enableFluidSpeed;
@@ -50,6 +53,8 @@ public final class TickAccelerateConfig {
     public final ModConfigSpec.BooleanValue enablePortalCooldown;
     public final ModConfigSpec.BooleanValue enableDayTime;
     public final ModConfigSpec.BooleanValue enableBlockEntityTick;
+    public final ModConfigSpec.BooleanValue enableWeatherCycle;
+    public final ModConfigSpec.BooleanValue enableSpawnerCooldown;
 
     /* ── client ── */
     public final ModConfigSpec.BooleanValue enableClientAnimations;
@@ -62,6 +67,11 @@ public final class TickAccelerateConfig {
         var minTpsVal = builder
                 .comment("Minimum TPS to use in calculations (clamp floor). Below this, compensation stops increasing.")
                 .defineInRange("minTps", 5.0, 1.0, 20.0);
+        var tpsSmoothingAlphaVal = builder
+                .comment("EMA smoothing factor for TPS calculation (0 = no change, 1 = no smoothing).",
+                         "Lower values produce smoother, slower transitions; higher values react faster.",
+                         "Recommended range: 0.05 ~ 0.3. Default 0.15 gives a good balance.")
+                .defineInRange("tpsSmoothingAlpha", 0.15, 0.01, 1.0);
         var serverLocaleVal = builder
                 .comment("Server display language for command output (e.g. en_us, zh_cn).",
                          "This ensures proper text rendering for clients that do not have the mod installed.")
@@ -148,6 +158,12 @@ public final class TickAccelerateConfig {
         var enableMobGrowthVal = builder
                 .comment("Compensate baby mob growth timer so babies grow up in the correct real time.")
                 .define("enableMobGrowth", true);
+        var enableTntFuseVal = builder
+                .comment("Compensate TNT fuse timer so TNT explodes in the correct real time (default 80 ticks = 4s).")
+                .define("enableTntFuse", true);
+        var enableFallingBlockVal = builder
+                .comment("Compensate falling block entity time counter so sand/gravel/anvils land at correct real-time speed.")
+                .define("enableFallingBlock", true);
         builder.pop();
 
         /* ── World ── */
@@ -167,6 +183,12 @@ public final class TickAccelerateConfig {
         var enableBlockEntityTickVal = builder
                 .comment("Compensate block entity ticking (furnaces, hoppers, brewing stands, etc).")
                 .define("enableBlockEntityTick", true);
+        var enableWeatherCycleVal = builder
+                .comment("Compensate weather cycle so rain/thunder transitions happen at correct real-time speed.")
+                .define("enableWeatherCycle", true);
+        var enableSpawnerCooldownVal = builder
+                .comment("Compensate mob spawner delay so spawners produce mobs at the correct real-time rate.")
+                .define("enableSpawnerCooldown", true);
         builder.pop();
 
         /* ── Client ── */
@@ -181,7 +203,7 @@ public final class TickAccelerateConfig {
         SPEC = builder.build();
 
         INSTANCE = new TickAccelerateConfig(
-                minTpsVal, serverLocaleVal, disableWatchdogVal,
+                minTpsVal, tpsSmoothingAlphaVal, serverLocaleVal, disableWatchdogVal,
                 enableBlockBreakingVal, enableAttackCooldownVal, enableFoodRegenVal,
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
                 enableSleepTimerVal,
@@ -191,14 +213,17 @@ public final class TickAccelerateConfig {
                 enableFireTickVal, enableBoardingCooldownVal,
                 enableItemDespawnVal, enableXpOrbAgeVal,
                 enableArrowLifeVal, enableBreedingTimerVal, enableMobGrowthVal,
+                enableTntFuseVal, enableFallingBlockVal,
                 enableFluidSpeedVal, enableRandomTickVal, enablePortalCooldownVal,
                 enableDayTimeVal, enableBlockEntityTickVal,
+                enableWeatherCycleVal, enableSpawnerCooldownVal,
                 enableClientAnimationsVal
         );
     }
 
     private TickAccelerateConfig(
             ModConfigSpec.DoubleValue minTps,
+            ModConfigSpec.DoubleValue tpsSmoothingAlpha,
             ModConfigSpec.ConfigValue<String> serverLocale,
             ModConfigSpec.BooleanValue disableWatchdog,
             ModConfigSpec.BooleanValue enableBlockBreaking,
@@ -223,14 +248,19 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableArrowLife,
             ModConfigSpec.BooleanValue enableBreedingTimer,
             ModConfigSpec.BooleanValue enableMobGrowth,
+            ModConfigSpec.BooleanValue enableTntFuse,
+            ModConfigSpec.BooleanValue enableFallingBlock,
             ModConfigSpec.BooleanValue enableFluidSpeed,
             ModConfigSpec.BooleanValue enableRandomTick,
             ModConfigSpec.BooleanValue enablePortalCooldown,
             ModConfigSpec.BooleanValue enableDayTime,
             ModConfigSpec.BooleanValue enableBlockEntityTick,
+            ModConfigSpec.BooleanValue enableWeatherCycle,
+            ModConfigSpec.BooleanValue enableSpawnerCooldown,
             ModConfigSpec.BooleanValue enableClientAnimations
     ) {
         this.minTps = minTps;
+        this.tpsSmoothingAlpha = tpsSmoothingAlpha;
         this.serverLocale = serverLocale;
         this.disableWatchdog = disableWatchdog;
         this.enableBlockBreaking = enableBlockBreaking;
@@ -255,11 +285,15 @@ public final class TickAccelerateConfig {
         this.enableArrowLife = enableArrowLife;
         this.enableBreedingTimer = enableBreedingTimer;
         this.enableMobGrowth = enableMobGrowth;
+        this.enableTntFuse = enableTntFuse;
+        this.enableFallingBlock = enableFallingBlock;
         this.enableFluidSpeed = enableFluidSpeed;
         this.enableRandomTick = enableRandomTick;
         this.enablePortalCooldown = enablePortalCooldown;
         this.enableDayTime = enableDayTime;
         this.enableBlockEntityTick = enableBlockEntityTick;
+        this.enableWeatherCycle = enableWeatherCycle;
+        this.enableSpawnerCooldown = enableSpawnerCooldown;
         this.enableClientAnimations = enableClientAnimations;
     }
 }

@@ -49,6 +49,10 @@
   "tickaccelerate.feature.portal_cd": "传送冷却",
   "tickaccelerate.feature.day_time": "日夜循环",
   "tickaccelerate.feature.block_entity": "方块实体",
+  "tickaccelerate.feature.weather": "天气循环",
+  "tickaccelerate.feature.spawner": "刷怪笼",
+  "tickaccelerate.feature.tnt_fuse": "TNT引信",
+  "tickaccelerate.feature.falling_block": "下落方块",
   "tickaccelerate.feature.animations": "动画",
   "tickaccelerate.feature.watchdog": "看门狗",
 
@@ -80,6 +84,10 @@
   "tickaccelerate.hover.portal_cd": "传送门再次使用冷却 (玩家)",
   "tickaccelerate.hover.day_time": "日夜循环推进速度",
   "tickaccelerate.hover.block_entity": "熔炉、漏斗、酿造台等方块实体",
+  "tickaccelerate.hover.weather": "雨/雷/晴天天气循环计时器",
+  "tickaccelerate.hover.spawner": "刷怪笼生成延迟倒计时",
+  "tickaccelerate.hover.tnt_fuse": "TNT引信倒计时 (默认80刻=4秒)",
+  "tickaccelerate.hover.falling_block": "下落方块时间计数器 (沙子、沙砾、铁砧)",
   "tickaccelerate.hover.animations": "客户端受伤闪烁、死亡动画、挥手动画以正确速度播放",
 
   "tickaccelerate.val.block_break": "×%s 速度",
@@ -110,6 +118,10 @@
   "tickaccelerate.val.portal_cd": "%s刻→%s刻",
   "tickaccelerate.val.day_time": "×%s 速度",
   "tickaccelerate.val.block_entity": "×%s 处理",
+  "tickaccelerate.val.weather": "×%s 循环",
+  "tickaccelerate.val.spawner": "×%s 延迟",
+  "tickaccelerate.val.tnt_fuse": "%s刻→%s刻",
+  "tickaccelerate.val.falling_block": "×%s 时间",
   "tickaccelerate.val.animations": "×%s 播放"
 }
 

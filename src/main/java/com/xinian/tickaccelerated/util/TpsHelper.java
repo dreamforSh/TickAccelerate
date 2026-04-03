@@ -5,9 +5,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
 
 /**
- * TPS compensation utility with per-tick caching.
+ * TPS compensation utility with per-tick caching and EMA smoothing.
  * <p>Core formula: {@code newTicks = originalTicks * tps / 20}</p>
  * <p>{@code tps = min(20, 1000 / mspt)}, clamped to [{@code minTps}, 20].</p>
+ *
+ * <p>An Exponential Moving Average (EMA) filter is applied on top of
+ * Minecraft's own MSPT smoothing to eliminate short-lived TPS spikes
+ * and produce gradual, visually smooth compensation transitions.</p>
  */
 public final class TpsHelper {
 
@@ -18,11 +22,18 @@ public final class TpsHelper {
     private static float cachedFactor = 1.0F;
     private static float cachedMultiplier = 1.0F;
 
+    /** EMA-smoothed TPS value (persists across ticks). */
+    private static float smoothedTps = MAX_TPS;
+    /** Whether the EMA has been seeded with an initial sample. */
+    private static boolean emaInitialized = false;
+
     private TpsHelper() {}
 
     /**
      * Returns the current server TPS, clamped to [minTps, 20].
-     * Values are cached per server tick for efficiency.
+     * <p>Values are cached per server tick for efficiency. An EMA filter
+     * is applied so that the returned TPS changes gradually instead of
+     * jumping between values when MSPT fluctuates.</p>
      */
     public static float getTps(MinecraftServer server) {
         if (server == null) return MAX_TPS;
@@ -30,15 +41,40 @@ public final class TpsHelper {
         if (tick != cachedTickCount) {
             cachedTickCount = tick;
             float mspt = server.getCurrentSmoothedTickTime();
+            float rawTps;
             if (mspt <= 0.0F) {
-                cachedTps = MAX_TPS;
+                rawTps = MAX_TPS;
             } else {
-                cachedTps = Math.max(getMinTps(), Math.min(MAX_TPS, 1000.0F / mspt));
+                rawTps = Math.max(getMinTps(), Math.min(MAX_TPS, 1000.0F / mspt));
             }
+
+            // --- EMA smoothing ---
+            float alpha = getSmoothingAlpha();
+            if (!emaInitialized) {
+                smoothedTps = rawTps;
+                emaInitialized = true;
+            } else {
+                smoothedTps += alpha * (rawTps - smoothedTps);
+            }
+            cachedTps = Math.max(getMinTps(), Math.min(MAX_TPS, smoothedTps));
+
             cachedFactor = cachedTps / MAX_TPS;
             cachedMultiplier = MAX_TPS / cachedTps;
         }
         return cachedTps;
+    }
+
+    /**
+     * Resets all cached / smoothed state.
+     * Call when the server stops so the next server start gets a fresh baseline.
+     */
+    public static void reset() {
+        cachedTickCount = -1;
+        cachedTps = MAX_TPS;
+        cachedFactor = 1.0F;
+        cachedMultiplier = 1.0F;
+        smoothedTps = MAX_TPS;
+        emaInitialized = false;
     }
 
     /**
@@ -135,6 +171,14 @@ public final class TpsHelper {
             return TickAccelerateConfig.INSTANCE.minTps.get().floatValue();
         } catch (Exception e) {
             return 5.0F;
+        }
+    }
+
+    private static float getSmoothingAlpha() {
+        try {
+            return TickAccelerateConfig.INSTANCE.tpsSmoothingAlpha.get().floatValue();
+        } catch (Exception e) {
+            return 0.15F;
         }
     }
 }

@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,10 +40,15 @@ public abstract class MobEffectInstanceMixin {
             CallbackInfoReturnable<Boolean> cir
     ) {
         if (entity.level().isClientSide()) return;
-        if (!TickAccelerateConfig.INSTANCE.enablePotionEffect.get()) return;
         if (this.isInfiniteDuration() || this.duration <= 0) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(entity);
+        MinecraftServer server = entity.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enablePotionEffect) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$potionAccum);
         if (extra > 0) {
             this.duration = Math.max(0, this.duration - extra);

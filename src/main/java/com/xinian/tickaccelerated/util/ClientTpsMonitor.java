@@ -61,16 +61,22 @@ public final class ClientTpsMonitor {
         return getTps() / MAX_TPS;
     }
 
-    /** @see TpsHelper#computeExtraTicks(float, float) */
-    public static int computeExtraTicks(float random) {
+    /**
+     * Deterministic extra-tick calculation with fractional accumulator (client-side).
+     *
+     * @param accumulator single-element array holding the carried fraction
+     * @return extra whole ticks to add this tick
+     * @see TpsHelper#computeExtraTicksDeterministic(float, float[])
+     */
+    public static int computeExtraTicksDeterministic(float[] accumulator) {
         float multiplier = getSpeedMultiplier();
-        if (multiplier <= 1.0F) return 0;
-        float extra = multiplier - 1.0F;
-        int whole = (int) extra;
-        float fraction = extra - whole;
-        if (fraction > 0 && random < fraction) {
-            whole++;
+        if (multiplier <= 1.0F) {
+            accumulator[0] = 0.0F;
+            return 0;
         }
+        float total = (multiplier - 1.0F) + accumulator[0];
+        int whole = (int) total;
+        accumulator[0] = total - whole;
         return whole;
     }
 }

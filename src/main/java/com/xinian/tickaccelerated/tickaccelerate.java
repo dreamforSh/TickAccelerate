@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import com.xinian.tickaccelerated.command.TickAccelerateCommand;
 import com.xinian.tickaccelerated.config.TickAccelerateConfig;
 import com.xinian.tickaccelerated.util.ServerI18n;
+import com.xinian.tickaccelerated.util.TpsHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -11,6 +12,7 @@ import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import org.slf4j.Logger;
 
 /**
@@ -28,6 +30,7 @@ public class TickAccelerate {
         modContainer.registerConfig(ModConfig.Type.SERVER, TickAccelerateConfig.SPEC);
         modEventBus.addListener(this::onConfigLoad);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopping);
         ServerI18n.load("en_us");
         LOGGER.info("Tick Accelerate initialized – TPS compensation via Mixin active");
     }
@@ -44,5 +47,9 @@ public class TickAccelerate {
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         TickAccelerateCommand.register(event.getDispatcher());
+    }
+
+    private void onServerStopping(ServerStoppingEvent event) {
+        TpsHelper.reset();
     }
 }

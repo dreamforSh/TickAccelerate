@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,10 +35,15 @@ public abstract class FoodDataMixin {
     @Inject(method = "tick", at = @At("TAIL"))
     private void tickaccelerate$compensateFoodTimer(Player player, CallbackInfo ci) {
         if (player.level().isClientSide()) return;
-        if (!TickAccelerateConfig.INSTANCE.enableFoodRegen.get()) return;
         if (this.tickTimer <= 0) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(player);
+        MinecraftServer server = player.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableFoodRegen) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$foodAccum);
         if (extra > 0) {
             this.tickTimer += extra;

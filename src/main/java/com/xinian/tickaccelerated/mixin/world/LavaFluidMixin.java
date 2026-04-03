@@ -1,6 +1,6 @@
 package com.xinian.tickaccelerated.mixin.world;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -24,6 +24,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * // possibly ×4 when flowing uphill
  * return i;
  * </pre>
+ *
+ * <h3>Compensation strategy</h3>
+ * <p>The spread delay is scaled by {@code tps / 20} (tickFactor) so that
+ * the real-time interval between flow steps stays constant regardless of TPS.
+ * Stochastic rounding is used: the fractional part of the scaled delay
+ * becomes the probability of rounding down instead of up.  Over many ticks
+ * this yields the exact correct average delay, eliminating the systematic
+ * bias that plain {@code Math.round} introduces on long lava delays (30t).</p>
  */
 @Mixin(LavaFluid.class)
 public abstract class LavaFluidMixin {
@@ -34,21 +42,21 @@ public abstract class LavaFluidMixin {
             CallbackInfoReturnable<Integer> cir
     ) {
         if (level.isClientSide()) return;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableFluidSpeed.get()) return;
-        } catch (Exception e) {
-            return;
-        }
 
         MinecraftServer server = level.getServer();
         if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableFluidSpeed) return;
 
         float tickFactor = TpsHelper.getTickFactor(server);
         if (tickFactor >= 1.0F) return;
 
         int original = cir.getReturnValue();
-        int scaled = Math.max(1, Math.round(original * tickFactor));
-        cir.setReturnValue(scaled);
+        float scaled = original * tickFactor;
+        int floor = (int) scaled;
+        float frac = scaled - floor;
+        int result = (frac > 0 && level.getRandom().nextFloat() < frac) ? floor + 1 : floor;
+        cir.setReturnValue(Math.max(1, result));
     }
 }
-

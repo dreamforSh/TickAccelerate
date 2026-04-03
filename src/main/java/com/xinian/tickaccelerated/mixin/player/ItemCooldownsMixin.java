@@ -1,6 +1,6 @@
 package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.item.ServerItemCooldowns;
@@ -26,12 +26,14 @@ public abstract class ItemCooldownsMixin {
     @ModifyVariable(method = "addCooldown", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     private int tickaccelerate$compensateCooldownTicks(int originalTicks) {
         if (!((Object) this instanceof ServerItemCooldowns)) return originalTicks;
-        if (!TickAccelerateConfig.INSTANCE.enableItemCooldown.get()) return originalTicks;
         var server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return originalTicks;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableItemCooldown) return originalTicks;
+
         float tickFactor = TpsHelper.getTickFactor(server);
         if (tickFactor >= 1.0F) return originalTicks;
         return Math.max(1, Math.round(originalTicks * tickFactor));
     }
 }
-

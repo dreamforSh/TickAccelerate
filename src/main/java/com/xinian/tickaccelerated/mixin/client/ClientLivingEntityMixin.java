@@ -5,6 +5,7 @@ import com.xinian.tickaccelerated.util.ClientTpsMonitor;
 import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,6 +39,11 @@ public abstract class ClientLivingEntityMixin {
 
     @Shadow public abstract int getCurrentSwingDuration();
 
+    @Unique private final float[] tickaccelerate$clientHurtAccum = new float[1];
+    @Unique private final float[] tickaccelerate$clientIFrameAccum = new float[1];
+    @Unique private final float[] tickaccelerate$clientDeathAccum = new float[1];
+    @Unique private final float[] tickaccelerate$clientSwingAccum = new float[1];
+
     /**
      * After vanilla's {@code baseTick()}, apply extra hurtTime / invulnerableTime
      * decrements on the CLIENT side.
@@ -58,7 +64,7 @@ public abstract class ClientLivingEntityMixin {
 
         // ── hurtTime ──
         if (this.hurtTime > 0) {
-            int extra = ClientTpsMonitor.computeExtraTicks(self.getRandom().nextFloat());
+            int extra = ClientTpsMonitor.computeExtraTicksDeterministic(this.tickaccelerate$clientHurtAccum);
             if (extra > 0) {
                 this.hurtTime = Math.max(0, this.hurtTime - extra);
             }
@@ -66,7 +72,7 @@ public abstract class ClientLivingEntityMixin {
 
         // ── invulnerableTime ──
         if (self.invulnerableTime > 0) {
-            int extra = ClientTpsMonitor.computeExtraTicks(self.getRandom().nextFloat());
+            int extra = ClientTpsMonitor.computeExtraTicksDeterministic(this.tickaccelerate$clientIFrameAccum);
             if (extra > 0) {
                 self.invulnerableTime = Math.max(0, self.invulnerableTime - extra);
             }
@@ -88,10 +94,7 @@ public abstract class ClientLivingEntityMixin {
             return;
         }
 
-        float mult = ClientTpsMonitor.getSpeedMultiplier();
-        if (mult <= 1.0F) return;
-
-        int extra = ClientTpsMonitor.computeExtraTicks(self.getRandom().nextFloat());
+        int extra = ClientTpsMonitor.computeExtraTicksDeterministic(this.tickaccelerate$clientDeathAccum);
         if (extra > 0) {
             this.deathTime += extra;
         }
@@ -114,11 +117,8 @@ public abstract class ClientLivingEntityMixin {
 
         if (!this.swinging || this.swingTime <= 0) return;
 
-        float mult = ClientTpsMonitor.getSpeedMultiplier();
-        if (mult <= 1.0F) return;
-
         int duration = this.getCurrentSwingDuration();
-        int extra = ClientTpsMonitor.computeExtraTicks(self.getRandom().nextFloat());
+        int extra = ClientTpsMonitor.computeExtraTicksDeterministic(this.tickaccelerate$clientSwingAccum);
         if (extra > 0) {
             this.swingTime += extra;
             // Let vanilla's next tick handle the completion check

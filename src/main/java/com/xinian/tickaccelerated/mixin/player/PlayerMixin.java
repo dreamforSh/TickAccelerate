@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,34 +26,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Player.class)
 public abstract class PlayerMixin {
 
-    @Shadow
-    public int takeXpDelay;
+    @Shadow public int takeXpDelay;
+    @Shadow private int sleepCounter;
 
-    @Shadow
-    private int sleepCounter;
-
-    @Unique
-    private final float[] tickaccelerate$xpAccum = new float[1];
-
-    @Unique
-    private final float[] tickaccelerate$sleepAccum = new float[1];
+    @Unique private final float[] tickaccelerate$xpAccum = new float[1];
+    @Unique private final float[] tickaccelerate$sleepAccum = new float[1];
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void tickaccelerate$compensatePlayerTick(CallbackInfo ci) {
         Player self = (Player) (Object) this;
         if (!(self instanceof ServerPlayer)) return;
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         if (multiplier <= 1.0F) return;
 
-        if (TickAccelerateConfig.INSTANCE.enableXpPickupDelay.get() && this.takeXpDelay > 0) {
+        if (config.enableXpPickupDelay && this.takeXpDelay > 0) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$xpAccum);
             if (extra > 0) {
                 this.takeXpDelay = Math.max(0, this.takeXpDelay - extra);
             }
         }
 
-        if (TickAccelerateConfig.INSTANCE.enableSleepTimer.get()
+        if (config.enableSleepTimer
                 && this.sleepCounter > 0 && this.sleepCounter < 100) {
             int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$sleepAccum);
             if (extra > 0) {

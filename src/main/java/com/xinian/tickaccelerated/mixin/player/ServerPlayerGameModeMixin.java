@@ -1,10 +1,12 @@
 package com.xinian.tickaccelerated.mixin.player;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ServerPlayerGameModeMixin {
 
     @Shadow
+    @Final
     protected ServerPlayer player;
 
     @Shadow
@@ -39,8 +42,13 @@ public abstract class ServerPlayerGameModeMixin {
      */
     @Inject(method = "tick", at = @At("HEAD"))
     private void tickaccelerate$compensateGameTicks(CallbackInfo ci) {
-        if (!TickAccelerateConfig.INSTANCE.enableBlockBreaking.get()) return;
-        float multiplier = TpsHelper.getSpeedMultiplier(this.player);
+        MinecraftServer server = this.player.getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableBlockBreaking) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$accum);
         if (extra > 0) {
             this.gameTicks += extra;

@@ -1,7 +1,8 @@
 package com.xinian.tickaccelerated.mixin.entity;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
 import com.xinian.tickaccelerated.util.TpsHelper;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,15 +37,17 @@ public abstract class ExperienceOrbMixin {
     private void tickaccelerate$compensateXpAge(CallbackInfo ci) {
         ExperienceOrb self = (ExperienceOrb) (Object) this;
         if (self.level().isClientSide()) return;
-        try {
-            if (!TickAccelerateConfig.INSTANCE.enableXpOrbAge.get()) return;
-        } catch (Exception e) { return; }
 
-        float multiplier = TpsHelper.getSpeedMultiplier(self);
+        MinecraftServer server = self.level().getServer();
+        if (server == null) return;
+
+        ConfigSnapshot config = ConfigSnapshot.get(server);
+        if (!config.enableXpOrbAge) return;
+
+        float multiplier = TpsHelper.getSpeedMultiplier(server);
         int extra = TpsHelper.computeExtraTicksDeterministic(multiplier, this.tickaccelerate$ageAccum);
         if (extra > 0) {
             this.age += extra;
         }
     }
 }
-

@@ -1,6 +1,7 @@
 package com.xinian.tickaccelerated.mixin.server;
 
-import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.config.ConfigSnapshot;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,10 +27,9 @@ public abstract class DedicatedServerMixin {
     private void tickaccelerate$disableWatchdog(CallbackInfoReturnable<Long> cir) {
         boolean disable;
         try {
-            disable = TickAccelerateConfig.INSTANCE.disableWatchdog.get();
+            ConfigSnapshot config = ConfigSnapshot.get((MinecraftServer) (Object) this);
+            disable = config.disableWatchdog;
         } catch (Exception e) {
-            // SERVER config is not yet loaded (e.g. during initServer);
-            // default to disabling the watchdog since low TPS would crash the server.
             disable = true;
         }
         if (disable) {
