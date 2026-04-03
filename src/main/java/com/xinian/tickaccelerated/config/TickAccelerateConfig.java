@@ -13,6 +13,7 @@ public final class TickAccelerateConfig {
 
     /* ── general ── */
     public final ModConfigSpec.DoubleValue minTps;
+    public final ModConfigSpec.ConfigValue<String> serverLocale;
 
     /* ── server ── */
     public final ModConfigSpec.BooleanValue disableWatchdog;
@@ -61,6 +62,10 @@ public final class TickAccelerateConfig {
         var minTpsVal = builder
                 .comment("Minimum TPS to use in calculations (clamp floor). Below this, compensation stops increasing.")
                 .defineInRange("minTps", 5.0, 1.0, 20.0);
+        var serverLocaleVal = builder
+                .comment("Server display language for command output (e.g. en_us, zh_cn).",
+                         "This ensures proper text rendering for clients that do not have the mod installed.")
+                .define("serverLocale", "en_us");
         builder.pop();
 
         /* ── Server ── */
@@ -176,7 +181,7 @@ public final class TickAccelerateConfig {
         SPEC = builder.build();
 
         INSTANCE = new TickAccelerateConfig(
-                minTpsVal, disableWatchdogVal,
+                minTpsVal, serverLocaleVal, disableWatchdogVal,
                 enableBlockBreakingVal, enableAttackCooldownVal, enableFoodRegenVal,
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
                 enableSleepTimerVal,
@@ -194,6 +199,7 @@ public final class TickAccelerateConfig {
 
     private TickAccelerateConfig(
             ModConfigSpec.DoubleValue minTps,
+            ModConfigSpec.ConfigValue<String> serverLocale,
             ModConfigSpec.BooleanValue disableWatchdog,
             ModConfigSpec.BooleanValue enableBlockBreaking,
             ModConfigSpec.BooleanValue enableAttackCooldown,
@@ -225,6 +231,7 @@ public final class TickAccelerateConfig {
             ModConfigSpec.BooleanValue enableClientAnimations
     ) {
         this.minTps = minTps;
+        this.serverLocale = serverLocale;
         this.disableWatchdog = disableWatchdog;
         this.enableBlockBreaking = enableBlockBreaking;
         this.enableAttackCooldown = enableAttackCooldown;

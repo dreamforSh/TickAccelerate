@@ -3,10 +3,12 @@ package com.xinian.tickaccelerated;
 import com.mojang.logging.LogUtils;
 import com.xinian.tickaccelerated.command.TickAccelerateCommand;
 import com.xinian.tickaccelerated.config.TickAccelerateConfig;
+import com.xinian.tickaccelerated.util.ServerI18n;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.slf4j.Logger;
@@ -24,8 +26,20 @@ public class TickAccelerate {
 
     public TickAccelerate(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.SERVER, TickAccelerateConfig.SPEC);
+        modEventBus.addListener(this::onConfigLoad);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+        ServerI18n.load("en_us");
         LOGGER.info("Tick Accelerate initialized – TPS compensation via Mixin active");
+    }
+
+    private void onConfigLoad(ModConfigEvent event) {
+        if (event.getConfig().getType() == ModConfig.Type.SERVER) {
+            try {
+                ServerI18n.load(TickAccelerateConfig.INSTANCE.serverLocale.get());
+            } catch (Exception e) {
+                ServerI18n.load("en_us");
+            }
+        }
     }
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
