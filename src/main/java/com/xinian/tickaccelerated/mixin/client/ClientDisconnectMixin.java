@@ -2,7 +2,6 @@ package com.xinian.tickaccelerated.mixin.client;
 
 import com.xinian.tickaccelerated.util.ClientTpsMonitor;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -17,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public abstract class ClientDisconnectMixin {
 
-    @Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;Z)V", at = @At("HEAD"))
-    private void tickaccelerate$resetClientTps(Screen nextScreen, boolean keepResourcePacks, CallbackInfo ci) {
+    @Inject(method = "disconnect()V", at = @At("HEAD"))
+    private void tickaccelerate$resetClientTps(CallbackInfo ci) {
         ClientTpsMonitor.reset();
     }
 }

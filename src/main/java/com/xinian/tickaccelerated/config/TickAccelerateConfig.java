@@ -18,6 +18,7 @@ public final class TickAccelerateConfig {
 
     /* ── server ── */
     public final ModConfigSpec.BooleanValue disableWatchdog;
+    public final ModConfigSpec.BooleanValue enableAntiKick;
 
     /* ── player ── */
     public final ModConfigSpec.BooleanValue enableBlockBreaking;
@@ -83,6 +84,11 @@ public final class TickAccelerateConfig {
         var disableWatchdogVal = builder
                 .comment("Disable the dedicated server watchdog to prevent crash on low TPS.")
                 .define("disableWatchdog", true);
+        var enableAntiKickVal = builder
+                .comment("Compensate tick-based anti-cheat thresholds at low TPS.",
+                         "Prevents players from being kicked for 'flying' or 'moved too quickly'",
+                         "and compensates chat/drop spam counter decay rate.")
+                .define("enableAntiKick", true);
         builder.pop();
 
         /* ── Player ── */
@@ -204,6 +210,7 @@ public final class TickAccelerateConfig {
 
         INSTANCE = new TickAccelerateConfig(
                 minTpsVal, tpsSmoothingAlphaVal, serverLocaleVal, disableWatchdogVal,
+                enableAntiKickVal,
                 enableBlockBreakingVal, enableAttackCooldownVal, enableFoodRegenVal,
                 enableItemUseVal, enableItemCooldownVal, enableXpPickupDelayVal,
                 enableSleepTimerVal,
@@ -226,6 +233,7 @@ public final class TickAccelerateConfig {
             ModConfigSpec.DoubleValue tpsSmoothingAlpha,
             ModConfigSpec.ConfigValue<String> serverLocale,
             ModConfigSpec.BooleanValue disableWatchdog,
+            ModConfigSpec.BooleanValue enableAntiKick,
             ModConfigSpec.BooleanValue enableBlockBreaking,
             ModConfigSpec.BooleanValue enableAttackCooldown,
             ModConfigSpec.BooleanValue enableFoodRegen,
@@ -263,6 +271,7 @@ public final class TickAccelerateConfig {
         this.tpsSmoothingAlpha = tpsSmoothingAlpha;
         this.serverLocale = serverLocale;
         this.disableWatchdog = disableWatchdog;
+        this.enableAntiKick = enableAntiKick;
         this.enableBlockBreaking = enableBlockBreaking;
         this.enableAttackCooldown = enableAttackCooldown;
         this.enableFoodRegen = enableFoodRegen;

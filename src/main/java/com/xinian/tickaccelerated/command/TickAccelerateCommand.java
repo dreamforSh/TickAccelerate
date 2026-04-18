@@ -249,6 +249,15 @@ public final class TickAccelerateCommand {
             src.sendSuccess(() -> line, false);
         }
 
+        // ── Server compensations ──
+        src.sendSuccess(() -> sectionHeader("tickaccelerate.cmd.section.server"), false);
+        {
+            MutableComponent line = Component.literal("    ");
+            line.append(tickChip("anti_kick", cfg.enableAntiKick.get(), active,
+                    String.format("%.1f", mult)));
+            src.sendSuccess(() -> line, false);
+        }
+
         src.sendSuccess(() -> footerLink("/ta config", "tickaccelerate.cmd.link.view_config"), false);
         return 1;
     }
@@ -269,7 +278,10 @@ public final class TickAccelerateCommand {
 
         // ── Server ──
         src.sendSuccess(() -> sectionHeader("tickaccelerate.cmd.section.server"), false);
-        src.sendSuccess(() -> toggleRow("watchdog", cfg.disableWatchdog.get()), false);
+        src.sendSuccess(() -> toggleRow(
+                new String[]{"watchdog", "anti_kick"},
+                new boolean[]{cfg.disableWatchdog.get(), cfg.enableAntiKick.get()}
+        ), false);
 
         // ── Player ──
         src.sendSuccess(() -> sectionHeader("tickaccelerate.cmd.section.player"), false);

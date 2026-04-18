@@ -55,6 +55,7 @@
   "tickaccelerate.feature.falling_block": "Falling Block",
   "tickaccelerate.feature.animations": "Animations",
   "tickaccelerate.feature.watchdog": "Watchdog",
+  "tickaccelerate.feature.anti_kick": "Anti-Kick",
 
   "tickaccelerate.hover.block_break": "gameTicks accelerated for break progress",
   "tickaccelerate.hover.attack_cd": "attackStrengthTicker incremented faster",
@@ -89,6 +90,7 @@
   "tickaccelerate.hover.tnt_fuse": "TNT fuse countdown (default 80 ticks = 4s)",
   "tickaccelerate.hover.falling_block": "Falling block time counter (sand, gravel, anvil)",
   "tickaccelerate.hover.animations": "Client-side hurt flash, death anim, swing anim play at correct speed",
+  "tickaccelerate.hover.anti_kick": "Scales flying kick threshold & compensates spam counter decay at low TPS",
 
   "tickaccelerate.val.block_break": "×%s speed",
   "tickaccelerate.val.attack_cd": "×%s recovery",
@@ -122,5 +124,6 @@
   "tickaccelerate.val.spawner": "×%s delay",
   "tickaccelerate.val.tnt_fuse": "%st→%st",
   "tickaccelerate.val.falling_block": "×%s time",
-  "tickaccelerate.val.animations": "×%s playback"
+  "tickaccelerate.val.animations": "×%s playback",
+  "tickaccelerate.val.anti_kick": "×%s threshold"
 }

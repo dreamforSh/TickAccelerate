@@ -14,6 +14,7 @@ public final class ConfigSnapshot {
     private static int lastTick = -1;
 
     public final boolean disableWatchdog;
+    public final boolean enableAntiKick;
     public final boolean enableBlockBreaking;
     public final boolean enableAttackCooldown;
     public final boolean enableFoodRegen;
@@ -50,6 +51,7 @@ public final class ConfigSnapshot {
 
     private ConfigSnapshot(TickAccelerateConfig cfg) {
         this.disableWatchdog = cfg.disableWatchdog.get();
+        this.enableAntiKick = cfg.enableAntiKick.get();
         this.enableBlockBreaking = cfg.enableBlockBreaking.get();
         this.enableAttackCooldown = cfg.enableAttackCooldown.get();
         this.enableFoodRegen = cfg.enableFoodRegen.get();
@@ -117,6 +119,7 @@ public final class ConfigSnapshot {
 
     private ConfigSnapshot() {
         this.disableWatchdog = true;
+        this.enableAntiKick = true;
         this.enableBlockBreaking = true;
         this.enableAttackCooldown = true;
         this.enableFoodRegen = true;
